@@ -1,0 +1,8 @@
+.layoutcontainer{
+    display: flex;
+    height: 100vh;
+}
+.maincontent {
+    flex: 1;
+    overflow: auto;
+}

@@ -1,0 +1,54 @@
+@charset "utf-8";
+
+
+#calendar-container {
+    width: 800px;
+    margin: 50px auto;
+}
+
+/* 일요일 빨간색 */
+.fc .fc-day-sun a {
+    color: red;
+}
+
+/* 토요일 파란색 */
+.fc .fc-day-sat a {
+    color: blue;
+}
+
+/* 일정표 툴 바  */
+.fc .fc-toolbar.fc-header-toolbar {
+    margin: 0;
+    padding: 0 40px;
+    background-color: #ced4da;
+    height: 60px;
+    font-size: 12px; 
+    color: black;
+    border-radius: 20px 20px 0px 0px;
+}
+
+/* 달력 툴 바 버튼 */
+.fc .fc-toolbar-chunk .fc-button {
+    background-color: transparent;
+    border: none;
+    font-size: 14px;
+}
+/* 툴바 버튼 포커스 그림자 제거 */
+.fc .fc-toolbar-chunk .fc-button:focus {
+    box-shadow: none;
+}
+/* 툴바 hever 시 배경색 */
+.fc .fc-toolbar-chunk .fc-button:hover {
+    background-color: #82a9d1;
+}
+/* 날짜 화살표 */
+.fc .fc-button-primary span {
+    font-weight: bold;
+}
+
+.fc-theme-standard th {
+    height: 40px;
+    font-size: 15px;
+    line-height: 20px;
+    vertical-align: middle;
+}
