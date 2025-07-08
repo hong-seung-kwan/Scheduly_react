@@ -31,6 +31,7 @@ const Home = () => {
             }
           }}
           locale={'ko'}
+          dayHeaderFormat={{ weekday: 'short' }}
           dayCellContent={({ date }) => {
             return date.getDate();
           }}

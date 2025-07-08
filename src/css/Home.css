@@ -39,7 +39,7 @@
 }
 /* 툴바 hever 시 배경색 */
 .fc .fc-toolbar-chunk .fc-button:hover {
-    background-color: #82a9d1;
+    background-color: #87cdcf;
 }
 /* 날짜 화살표 */
 .fc .fc-button-primary span {
@@ -51,4 +51,7 @@
     font-size: 15px;
     line-height: 20px;
     vertical-align: middle;
+}
+.fc-dayGridWeek-view .fc-daygrid-day-frame {
+    height: 250px;
 }
