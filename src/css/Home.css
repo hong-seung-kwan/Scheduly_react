@@ -55,3 +55,7 @@
 .fc-dayGridWeek-view .fc-daygrid-day-frame {
     height: 250px;
 }
+
+#home-title {
+    text-align: center;
+}

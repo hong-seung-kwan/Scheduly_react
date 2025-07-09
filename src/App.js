@@ -2,6 +2,9 @@ import { Route, Routes } from "react-router-dom";
 
 import Layout from "./components/Layout";
 import Home from "./features/Home";
+import Register from "./features/Register";
+import Login from "./features/Login";
+
 
 function App() {
   return (
@@ -9,8 +12,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout></Layout>}>
           <Route path='/' element={<Home></Home>}></Route>
-          <Route path='/register' element={" "}></Route>
-          <Route path='/login' element={" "}></Route>
+          <Route path='/register' element={<Register></Register>}></Route>
+          <Route path='/login' element={<Login></Login>}></Route>
           <Route path='/board/list' element={" "}></Route>
           <Route path='/board/register' element={" "}></Route>
           <Route path='/board/read' element={" "}></Route>
