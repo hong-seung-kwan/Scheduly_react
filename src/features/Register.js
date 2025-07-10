@@ -5,8 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import "../css/register.css"
 
 
-
-
 // 아이디 비밀번호 유저이름
 const Register = () => {
 
@@ -26,6 +24,8 @@ const Register = () => {
     }
 
     const handleSubmit = async (e) => {
+
+        e.preventDefault();
 
         const response = await axios.post(
             `${host}/register` ,
@@ -50,14 +50,14 @@ const Register = () => {
             </div>
 
             
-            <div id="message" className="message hidden"></div>
+            
 
             <form id="signupForm" className="auth-form" onSubmit={handleSubmit}>
                 <div className="form-group">
                     <label htmlFor="name" className="form-label">이름</label>
                     <div className="input-with-icon">
                         <span className="input-icon">👤</span>
-                        <input type="text" id="name" name="name" className="form-input" placeholder="이름을 입력하세요" required onChange={handleChange}/>
+                        <input type="text" id="name" name="userName" className="form-input" placeholder="이름을 입력하세요" required onChange={handleChange}/>
                     </div>
                     
                 </div>
@@ -66,7 +66,7 @@ const Register = () => {
                     <label htmlFor="username" className="form-label">아이디</label>
                     <div className="input-with-icon">
                         <span className="input-icon">🆔</span>
-                        <input type="text" id="username" name="username" className="form-input" placeholder="아이디를 입력하세요" required onChange={handleChange}/>
+                        <input type="text" id="username" name="userId" className="form-input" placeholder="아이디를 입력하세요" required onChange={handleChange}/>
                     </div>
                 </div>
 

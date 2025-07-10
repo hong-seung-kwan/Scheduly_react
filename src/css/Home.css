@@ -22,7 +22,7 @@
     padding: 0 40px;
     background-color: #ced4da;
     height: 60px;
-    font-size: 12px; 
+    font-size: 12px;
     color: black;
     border-radius: 20px 20px 0px 0px;
 }
@@ -33,14 +33,17 @@
     border: none;
     font-size: 14px;
 }
+
 /* 툴바 버튼 포커스 그림자 제거 */
 .fc .fc-toolbar-chunk .fc-button:focus {
     box-shadow: none;
 }
+
 /* 툴바 hever 시 배경색 */
 .fc .fc-toolbar-chunk .fc-button:hover {
     background-color: #87cdcf;
 }
+
 /* 날짜 화살표 */
 .fc .fc-button-primary span {
     font-weight: bold;
@@ -52,10 +55,224 @@
     line-height: 20px;
     vertical-align: middle;
 }
+
 .fc-dayGridWeek-view .fc-daygrid-day-frame {
     height: 250px;
 }
+.fc .fc-daygrid-event {
+    margin-top: 10px;
+}
+.fc-event-custom {
+  display: flex;
+  flex-direction: column;
+  font-size: 11px;
+  padding: 2px;
+}
 
-#home-title {
+
+.fc-event-custom .fc-title {
+  font-weight: bold;
+  font-size: 12px;
+  overflow: hidden;
+  
+}
+
+.fc-event-custom .fc-contents {
+  color: #444;
+  font-size: 11px;
+  margin-top: 2px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+
+.home-title {
     text-align: center;
+}
+
+.main-container {
+    display: flex;
+    gap: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.today-tasks-section {
+    flex: 1;
+    min-width: 320px;
+    border-radius: 12px;
+    padding: 1.5rem;
+    height: fit-content;
+    position: sticky;
+    top: 2rem;
+}
+
+.tasks-header {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.tasks-header h3 {
+    color: #089196;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.today-date {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.tasks-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border-radius: 8px;
+    color: white;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 0.2rem;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+
+.add-task-section {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.task-input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 2px solid;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    outline: none;
+
+}
+
+.task-input:focus {
+    border-color: #76c3c5;
+}
+
+.add-btn {
+    width: 40px;
+    height: 40px;
+    background: #089196;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.add-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(118, 195, 197, 0.3);
+}
+
+.tasks-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    border-left: 3px solid transparent;
+}
+
+.task-item:hover {
+    background: #e9ecef;
+    transform: translateX(2px);
+}
+
+.task-item.completed {
+    opacity: 0.6;
+    background-color: #f1f8f1;
+}
+
+.task-item.completed .task-text {
+    text-decoration: line-through;
+    color: #6c757d;
+}
+
+.task-checkbox {
+    position: relative;
+    margin-right: 0.75rem;
+    cursor: pointer;
+}
+
+.task-checkbox input[type="checkbox"] {
+    position: absolute;
+    cursor: pointer;
+}
+
+.checkmark {
+    display: block;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border: 2px solid #76c3c5;
+    border-radius: 4px;
+    position: relative;
+}
+
+.task-checkbox input[type="checkbox"]:checked+.checkmark::after {
+    content: "✓";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.task-content {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.task-status {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-left: 0.5rem;
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+}
+
+.delete-btn:hover {
+    background: #f8d7da;
+    color: #721c24;
 }

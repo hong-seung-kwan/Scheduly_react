@@ -25,6 +25,9 @@ const Login = () => {
     }
 
     const handleSubmit = async (e) => {
+
+        e.preventDefault();
+
         const response = await axios.post(
             `${host}/login`,
             user
@@ -54,9 +57,9 @@ const Login = () => {
                         <label htmlFor="username" className="form-label">아이디</label>
                         <div className="input-with-icon">
                             <span className="input-icon">🆔</span>
-                            <input type="text" id="username" name="username" className="form-input" placeholder="아이디를 입력하세요" required onChange={handleChange}/>
+                            <input type="text" id="username" name="userId" className="form-input" placeholder="아이디를 입력하세요" required onChange={handleChange}/>
                         </div>
-                        <span className="form-error" id="usernameError"></span>
+                       
                     </div>
 
                     <div className="form-group">
@@ -65,7 +68,7 @@ const Login = () => {
                             <span className="input-icon">🔒</span>
                             <input type="password" id="password" name="password" className="form-input" placeholder="비밀번호를 입력하세요" required onChange={handleChange}/>
                         </div>
-                        <span className="form-error" id="passwordError"></span>
+                        
                     </div>
 
                     <button type="submit" id="submitBtn" className="auth-submit-btn">
