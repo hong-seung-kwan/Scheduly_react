@@ -59,30 +59,32 @@
 .fc-dayGridWeek-view .fc-daygrid-day-frame {
     height: 250px;
 }
+
 .fc .fc-daygrid-event {
     margin-top: 10px;
 }
+
 .fc-event-custom {
-  display: flex;
-  flex-direction: column;
-  font-size: 11px;
-  padding: 2px;
+    display: flex;
+    flex-direction: column;
+    font-size: 11px;
+    padding: 2px;
 }
 
 
 .fc-event-custom .fc-title {
-  font-weight: bold;
-  font-size: 12px;
-  overflow: hidden;
-  
+    font-weight: bold;
+    font-size: 12px;
+    overflow: hidden;
+
 }
 
 .fc-event-custom .fc-contents {
-  color: #444;
-  font-size: 11px;
-  margin-top: 2px;
-  white-space: normal;
-  word-break: break-word;
+    color: #444;
+    font-size: 11px;
+    margin-top: 2px;
+    white-space: normal;
+    word-break: break-word;
 }
 
 
@@ -263,6 +265,39 @@
     margin-left: 0.5rem;
 }
 
+.edit-btn {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.edit-btn:hover {
+    background: #e3f2fd;
+    color: #0056b3;
+}
+
+.cancel-btn {
+    background: none;
+    border: none;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    
+}
+
+.cancel-btn:hover {
+    background: #e2e6ea;
+    color: #495057;
+}
+
 .delete-btn {
     background: none;
     border: none;
@@ -275,4 +310,34 @@
 .delete-btn:hover {
     background: #f8d7da;
     color: #721c24;
+}
+
+.edit-input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 2px solid #76c3c5;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    outline: none;
+    margin-right: 0.5rem;
+}
+
+.empty-tasks {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: #6c757d;
+}
+
+.empty-tasks p {
+    margin: 0.5rem 0;
+}
+
+.empty-tasks p:first-child {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.empty-tasks p:last-child {
+    font-size: 0.9rem;
+    opacity: 0.8;
 }

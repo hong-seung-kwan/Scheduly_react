@@ -15,9 +15,105 @@ const Home = () => {
   const events = useSelector((state) => state.events);
   const dispatch = useDispatch();
   const { host } = useContext(Context)
-  const [todayTasks, setTodayTasks] = useState([
+  const [todayTasks, setTodayTasks] = useState([])
+  const [newTask, setNewTask] = useState("")
+  const [editingTaskId, setEditingTaskId] = useState(null);
+
+  const [editingText, setEditingText] = useState("")
+
+  const completedTasks = todayTasks.filter((task) => task.status).length
+  const remainingTasks = todayTasks.length - completedTasks
+
+  const today = new Date().toLocaleDateString("ko-KR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    weekday: "long"
+
+  })
+
+  const addTask = async () => {
+    if (newTask.trim() !== "") {
+      const newTaskItem = {
+        task: newTask.trim(),
+        status: false,
+      }
+
+
+      try {
+        const response = await axios.post(`${host}/task`, newTaskItem, {
+          headers: { Authorization: token }
+        });
+        const savedTask = response.data;
+        setTodayTasks([...todayTasks, savedTask])
+        setNewTask("")
+      } catch (err) {
+        console.log("실패", err);
+      }
+    }
+  }
+
+  const toggleTaskStatus = async (taskId) => {
+    const task = todayTasks.find(t => t.id === taskId);
+    if(!task) return;
+
+    const updateStatus = !task.status;
+    try {
+      await axios.post(`{host}/modify`, {
+        planDayNo: taskId,  
+        status: updateStatus
+      },{
+        headers: {Authorization: token}
+      });
     
-  ])
+    setTodayTasks((tasks) =>
+      tasks.map((task) =>
+        task.id === taskId ? { ...task, status: updateStatus } : task
+      )
+    );
+  } catch(error) {
+    console.log("실패", error);
+  }
+};
+
+  const deleteTask = (taskId) => {
+    setTodayTasks((tasks) => tasks.filter((task) => task.id !== taskId));
+  };
+
+  const startEditing = (taskId, currentText) => {
+    setEditingTaskId(taskId);
+    setEditingText(currentText);
+  };
+
+  const cancelEditing = () => {
+    setEditingTaskId(null);
+    setEditingText("");
+  };
+
+  const saveEdit = async (taskId) => {
+    if (editingText.trim() !== "") {
+      try {
+        const updatedTask = {
+          task: editingText.trim(),
+        };
+        await axios.post(`${host}/modify`, updatedTask, {
+          headers: { Authorization: token }
+        });
+
+        setTodayTasks((tasks) =>
+          tasks.map((task) =>
+            task.id === taskId ? { ...task, task: editingText.trim() } : task
+          )
+        );
+        setEditingTaskId(null);
+        setEditingText("");
+      } catch (err) {
+        console.log("수정 실패", err);
+      }
+    }
+
+  };
+
 
   const userNo = user?.userNo;
 
@@ -50,11 +146,11 @@ const Home = () => {
 
         const todayPlanDay = response.data.find(pd => pd.planDayDate === todayStr);
 
-        if(todayPlanDay) {
+        if (todayPlanDay) {
           const newTodayTasks = todayPlanDay.details.map((detail, index) => ({
             id: index,
             task: detail.detail,
-            status: detail.detailStatus
+            status: detail.detailStatus === "FINISHED"
           }));
           setTodayTasks(newTodayTasks);
         } else {
@@ -101,7 +197,7 @@ const Home = () => {
               },
               threeDay: {
                 type: "dayGrid",
-                duration: {days :3},
+                duration: { days: 3 },
                 buttonText: "3일 보기",
                 dayMaxEventRows: 3,
               }
@@ -137,16 +233,16 @@ const Home = () => {
         <div className="today-tasks-section">
           <div className="tasks-header">
             <h3>오늘 할일</h3>
-            <p className="today-date"></p>
+            <p className="today-date">{today}</p>
           </div>
 
           <div className="tasks-stats">
             <div className="stat-item">
-              <span className="stat-number"></span>
+              <span className="stat-number">{completedTasks}</span>
               <span className="stat-label">완료</span>
             </div>
             <div className="stat-item">
-              <span className="stat-number"></span>
+              <span className="stat-number">{remainingTasks}</span>
               <span className="stat-label">남은 일</span>
             </div>
           </div>
@@ -155,34 +251,78 @@ const Home = () => {
             <input
               type="text"
               className="task-input"
+              value={newTask}
+              onChange={(e) => setNewTask(e.target.value)}
               placeholder="새로운 할일을 입력하세요"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  addTask()
+                }
+              }}
             />
-            <button className="add-btn">
+            <button className="add-btn" onClick={addTask}>
               +
             </button>
           </div>
 
           <div className="tasks-list">
             {todayTasks.map((task) => (
-              <div key={task.id} className={`task-item ${task.completed ? "completed" : ""}`}>
+              <div key={task.id} className={`task-item ${task.status ? "completed" : ""}`}>
                 <div className="task-checkbox">
-                  <input type="checkbox" checked={task.status} readOnly />
+                  <input type="checkbox" checked={task.status} onChange={() => toggleTaskStatus(task.id)} />
                   <span className="checkmark"></span>
                 </div>
                 <div className="task-content">
-                  <span className="task-text">{task.task}</span>
+                  {editingTaskId === task.id ? (
+                    <input
+                      type='text'
+                      className='edit-input'
+                      value={editingText}
+                      onChange={(e) => setEditingText(e.target.value)}
+                      autoFocus
+                    />
+                  ) : (
+                    <span className='task-text'>{task.task}</span>
+                  )}
+
                   <div className={`task-status status-${task.status}`}></div>
                 </div>
-                <button className="delete-btn">
-                  ×
-                </button>
+
+                <div>
+                  {editingTaskId === task.id ? (
+                    <>
+                      <button className='save-btn' onClick={() => saveEdit(task.id)} title="저장">
+                        ✓
+                      </button>
+                      <button className='cancle-btn' onClick={cancelEditing} title="취소">
+                        ✕
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button className='edit-btn' onClick={() => startEditing(task.id, task.task)} title='수정'>
+                        ✏️
+                      </button>
+                      <button className='delete-btn' onClick={() => deleteTask(task.id)} title="삭제">
+                        ×
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             ))}
+
+            {todayTasks.length === 0 && (
+              <div className="empty-tasks">
+                <p>오늘 할일이 없습니다.</p>
+                <p>새로운 할일을 추가해보세요!</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
     </>
-  );
+  )
 }
 
 export default Home
