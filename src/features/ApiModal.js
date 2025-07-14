@@ -21,19 +21,20 @@ export const Modal = ({openModal, setOpenModal}) => {
         },
       });
 
-      const generatedPlanJson = gptResponse.data;
+      // const generatedPlanJson = gptResponse.data;
+      // const parsedJson = JSON.parse(gptResponse.data);
 
       // 2. 서버에 계획 저장 요청
-      const saveResponse = await axios.post(
-        `${host}/plan/api?userNo=${user.userNo}`,
-        generatedPlanJson,
-        {
-          headers: {
-            Authorization: token,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      // const saveResponse = await axios.post(
+      //   `${host}/plan/api?userNo=${user.userNo}`,
+      //   parsedJson,
+      //   {
+      //     headers: {
+      //       Authorization: token,
+      //       "Content-Type": "application/json",
+      //     },
+      //   }
+      // );
 
       alert("플랜이 성공적으로 등록되었습니다!");
       setOpenModal(false);

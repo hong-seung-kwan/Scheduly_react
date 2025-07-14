@@ -16,10 +16,7 @@ const Home = () => {
   const dispatch = useDispatch();
   const { host } = useContext(Context)
   const [todayTasks, setTodayTasks] = useState([
-    { id: 1, task: "회의 준비하기", completed: false, status: "high" },
-    { id: 2, task: "프로젝트 문서 작성", completed: true, status: "medium" },
-    { id: 3, task: "운동하기", completed: false, status: "low" },
-    { id: 4, task: "장보기", completed: false, status: "medium" },
+    
   ])
 
   const userNo = user?.userNo;
@@ -29,6 +26,7 @@ const Home = () => {
     if (!userNo) {
       // setEvents([]);
       dispatch(clearEvents());
+      setTodayTasks([]);
       return;
     }
     const apicall = async () => {
@@ -44,16 +42,31 @@ const Home = () => {
           contents: planDay.details.map(d => d.detail),
           start: planDay.planDayDate,
           end: planDay.planDayDate,
+          rawDetails: planDay.details,
         }));
         // setEvents(eventsData);
         dispatch(setEvents(eventsData));
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        const todayPlanDay = response.data.find(pd => pd.planDayDate === todayStr);
+
+        if(todayPlanDay) {
+          const newTodayTasks = todayPlanDay.details.map((detail, index) => ({
+            id: index,
+            task: detail.detail,
+            status: detail.detailStatus
+          }));
+          setTodayTasks(newTodayTasks);
+        } else {
+          setTodayTasks([]);
+        }
       } else {
         throw new Error(`api error: ${response.status} ${response.statusText}`);
       }
     }
 
     apicall();
-  }, [userNo, host, dispatch]);
+  }, [userNo, host, dispatch, token]);
 
   const handleEventClick = (info) => {
     alert(`이벤트 제목: ${info.event.title}`);
@@ -153,7 +166,7 @@ const Home = () => {
             {todayTasks.map((task) => (
               <div key={task.id} className={`task-item ${task.completed ? "completed" : ""}`}>
                 <div className="task-checkbox">
-                  <input type="checkbox" checked={task.completed} readOnly />
+                  <input type="checkbox" checked={task.status} readOnly />
                   <span className="checkmark"></span>
                 </div>
                 <div className="task-content">
