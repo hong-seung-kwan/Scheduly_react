@@ -53,15 +53,19 @@ const Home = () => {
     }
   }
 
-  const toggleTaskStatus = async (taskId) => {
-    const task = todayTasks.find(t => t.id === taskId);
+  const toggleTaskStatus = async (id, planDayNo, detailIndex) => {
+     console.log("status 호출됨:", { id, planDayNo, detailIndex});
+
+    const task = todayTasks.find(t => t.id === id);
     if (!task) return;
 
     const updateStatus = !task.status;
+    const newDetailStatus = updateStatus ? "FINISHED" : "BEFORE";
     try {
-      await axios.post(`{host}/modify`, {
-        planDayNo: taskId,
-        status: updateStatus
+      await axios.post(`${host}/jsonstatus`, {
+        planDayNo,
+        detailIndex,
+        // detailStatus: newDetailStatus
       }, {
         headers: {
           Authorization: token
@@ -70,7 +74,7 @@ const Home = () => {
 
       setTodayTasks((tasks) =>
         tasks.map((task) =>
-          task.id === taskId ? { ...task, status: updateStatus } : task
+          task.id === id ? { ...task, status: updateStatus } : task
         )
       );
     } catch (error) {
@@ -92,7 +96,9 @@ const Home = () => {
     setEditingText("");
   };
 
+  // 수정
   const saveEdit = async (id, planDayNo, detailIndex) => {
+    console.log("saveEdit 호출됨:", { id, planDayNo, detailIndex, editingText });
     if (editingText.trim() !== "") {
       try {
         const updatedTask = {
@@ -100,7 +106,7 @@ const Home = () => {
           detailIndex,
           detail: editingText.trim(),
         };
-        await axios.post(`${host}/modify`, updatedTask, {
+        await axios.post(`${host}/jsonmodify`, updatedTask, {
           headers: {
             Authorization: token
           }
@@ -165,7 +171,8 @@ useEffect(() => {
               planDayNo: planDay.planDayNo,                   // 어떤 planDay에 속한 detail인지
               id: `${planDay.planDayNo}-${index}`,            // 고유 ID
               task: detail.detail,
-              status: detail.detailStatus === "FINISHED"
+              status: detail.detailStatus === "FINISHED" ? true : false,
+              detailIndex: index
             });
           });
         });
@@ -287,9 +294,16 @@ return (
 
         <div className="tasks-list">
           {todayTasks.map((task) => (
+            
             <div key={task.id} className={`task-item ${task.status ? "completed" : ""}`}>
               <div className="task-checkbox">
-                <input type="checkbox" checked={task.status} onChange={() => toggleTaskStatus(task.id)} />
+                <input 
+                type="checkbox" 
+                checked={task.status} 
+                onClick={() => console.log("onCilc 발생",task.id)}
+                onChange={() => {
+                  console.log("체크박스 클릭!", task.id);
+                  toggleTaskStatus(task.id, task.planDayNo ,task.detailIndex)}} />
                 <span className="checkmark"></span>
               </div>
               <div className="task-content">

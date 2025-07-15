@@ -238,6 +238,7 @@
     border: 2px solid #76c3c5;
     border-radius: 4px;
     position: relative;
+    pointer-events: none;
 }
 
 .task-checkbox input[type="checkbox"]:checked+.checkmark::after {
