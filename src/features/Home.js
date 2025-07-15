@@ -6,6 +6,7 @@ import axios from "axios";
 import { Context } from '../index';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearEvents, setEvents } from '../store/eventSlice';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 
 const Home = () => {
 
@@ -20,9 +21,8 @@ const Home = () => {
   const [editingTaskId, setEditingTaskId] = useState(null);
 
   const [editingText, setEditingText] = useState("")
-
-  const completedTasks = todayTasks.filter((task) => task.status).length
-  const remainingTasks = todayTasks.length - completedTasks
+  const [selectedTasks, setSelectedTasks] = useState([]);
+  const [reload, setReload] = useState(false);
 
   const today = new Date().toLocaleDateString("ko-KR", {
     year: "numeric",
@@ -31,48 +31,73 @@ const Home = () => {
     weekday: "long"
 
   })
+  const handleEventClick = (info) => {
+    const rawDetails = info.event.extendedProps.rawDetails;
+    const planDayNo = info.event.id;
 
+    const taskList = rawDetails.map((detail, index) => ({
+      id: `${planDayNo}-${index}`,
+      planDayNo: planDayNo,
+      task: detail.detail,
+      status: detail.datailStatus === "FINISHED",
+      detailIndex: index
+    }));
+    setSelectedTasks(taskList);
+  };
+  // 추가
   const addTask = async () => {
-    if (newTask.trim() !== "") {
+    const planDayNo = selectedTasks[0].planDayNo;
+
+    try {
+      const newDetail = {
+        planDayNo: planDayNo,
+        content: newTask.trim()
+      };
+      console.log("Sending add request with data:", newDetail);
+      const response = await axios.post(`${host}/addJson`, newDetail, {
+        headers: {
+          Authorization: token
+        }
+      });
+      console.log("Response from server:", response.data);
+      const save = response.data;
+
       const newTaskItem = {
-        task: newTask.trim(),
-        status: false,
-      }
+        id: `${planDayNo}-${save.detailIndex}`,
+        planDayNo: planDayNo,
+        detailIndex: save.detailIndex,
+        task: save.detail,
+        status: save.detailStatus === "FINISHED"
+      };
 
+      setSelectedTasks(prev => [...prev, newTaskItem]);
+      setNewTask("");
 
-      try {
-        const response = await axios.post(`${host}/register`, newTaskItem, {
-          headers: { Authorization: token }
-        });
-        const savedTask = response.data;
-        setTodayTasks([...todayTasks, savedTask])
-        setNewTask("")
-      } catch (err) {
-        console.log("실패", err);
-      }
+    } catch (err) {
+      console.log("추가 실패", err);
     }
-  }
+  };
 
+
+  // 상태 변경
   const toggleTaskStatus = async (id, planDayNo, detailIndex) => {
-     console.log("status 호출됨:", { id, planDayNo, detailIndex});
+    console.log("status 호출됨:", { id, planDayNo, detailIndex });
 
-    const task = todayTasks.find(t => t.id === id);
+    const task = selectedTasks.find(t => t.id === id);
     if (!task) return;
 
     const updateStatus = !task.status;
-    const newDetailStatus = updateStatus ? "FINISHED" : "BEFORE";
     try {
       await axios.post(`${host}/jsonstatus`, {
         planDayNo,
         detailIndex,
-        // detailStatus: newDetailStatus
       }, {
         headers: {
           Authorization: token
         }
       });
 
-      setTodayTasks((tasks) =>
+      setSelectedTasks((tasks) =>
         tasks.map((task) =>
           task.id === id ? { ...task, status: updateStatus } : task
         )
@@ -82,8 +107,22 @@ const Home = () => {
     }
   };
 
-  const deleteTask = (taskId) => {
-    setTodayTasks((tasks) => tasks.filter((task) => task.id !== taskId));
+  // 삭제
+  const deleteTask = async (taskId, planDayNo, detailIndex) => {
+
+    try {
+      await axios.post(`${host}/removeJson`, {
+        planDayNo,
+        detailIndex
+      }, {
+        headers: {
+          Authorization: token
+        }
+      })
+      setSelectedTasks((tasks) => tasks.filter((task) => task.id !== taskId));
+    } catch (error) {
+      console.log("삭제 실패: ", error);
+    }
   };
 
   const startEditing = (taskId, currentText) => {
@@ -112,7 +151,7 @@ const Home = () => {
           }
         });
 
-        setTodayTasks((tasks) =>
+        setSelectedTasks((tasks) =>
           tasks.map((task) =>
             task.id === id ? { ...task, task: editingText.trim() } : task
           )
@@ -126,241 +165,247 @@ const Home = () => {
 
   };
 
+  const moveTask = async (planDayNo, detailIndex, direction) => {
+    console.log(`[순서 이동 요청] planDayNo: ${planDayNo}, detailIndex: ${detailIndex}, 방향: ${direction}`);
 
-  const userNo = user?.userNo;
-
-useEffect(() => {
-  console.log(userNo);
-  if (!userNo) {
-    dispatch(clearEvents());
-    setTodayTasks([]);
-    return;
-  }
-
-  const apicall = async () => {
     try {
-      const response = await axios.get(`${host}/list?no=${userNo}`, {
+      await axios.post(`${host}/moveJson`,{
+        planDayNo,
+        detailIndex,
+        move:direction
+      },{
         headers: {
           Authorization: token
         }
       });
 
-      if (response.status === 200) {
-        const eventsData = response.data.map(planDay => ({
-          id: planDay.planDayNo,
-          title: planDay.planDayContent,
-          contents: planDay.details.map(d => d.detail),
-          start: planDay.planDayDate,
-          end: planDay.planDayDate,
-          rawDetails: planDay.details,
-        }));
+      setReload(prev => !prev);
+    } catch(err) {
+      console.log("이동 실패", err);
+    }
+  }
 
-        dispatch(setEvents(eventsData));
+  const userNo = user?.userNo;
 
-        const todayStr = new Date().toISOString().split('T')[0];
+  useEffect(() => {
 
-        
-        const todayPlanDays = response.data.filter(pd => pd.planDayDate === todayStr);
+    if (!userNo) {
+      dispatch(clearEvents());
+      setTodayTasks([]);
+      return;
+    }
+    if (selectedTasks.length === 0 && todayTasks.length > 0) {
+      setSelectedTasks(todayTasks);
+    }
 
-        
-        const newTodayTasks = [];
-
-        todayPlanDays.forEach(planDay => {
-          planDay.details.forEach((detail, index) => {
-            newTodayTasks.push({
-              planDayNo: planDay.planDayNo,                   // 어떤 planDay에 속한 detail인지
-              id: `${planDay.planDayNo}-${index}`,            // 고유 ID
-              task: detail.detail,
-              status: detail.detailStatus === "FINISHED" ? true : false,
-              detailIndex: index
-            });
-          });
+    const apicall = async () => {
+      try {
+        const response = await axios.get(`${host}/list?no=${userNo}`, {
+          headers: {
+            Authorization: token
+          }
         });
 
-        setTodayTasks(newTodayTasks);
-      } else {
-        throw new Error(`API error: ${response.status} ${response.statusText}`);
+        if (response.status === 200) {
+          const eventsData = response.data.map(planDay => ({
+            id: planDay.planDayNo,
+            title: planDay.planDayContent,
+            contents: planDay.details.map(d => d.detail),
+            start: planDay.planDayDate,
+            end: planDay.planDayDate,
+            rawDetails: planDay.details,
+          }));
+
+          dispatch(setEvents(eventsData));
+
+          const todayStr = new Date().toISOString().split('T')[0];
+
+
+          const todayPlanDays = response.data.filter(pd => pd.planDayDate === todayStr);
+
+
+          const newTodayTasks = [];
+
+          todayPlanDays.forEach(planDay => {
+            planDay.details.forEach((detail, index) => {
+              newTodayTasks.push({
+                planDayNo: planDay.planDayNo,                   // 어떤 planDay에 속한 detail인지
+                id: `${planDay.planDayNo}-${index}`,            // 고유 ID
+                task: detail.detail,
+                status: detail.detailStatus === "FINISHED" ? true : false,
+                detailIndex: index
+              });
+            });
+          });
+
+          setTodayTasks(newTodayTasks);
+        } else {
+          throw new Error(`API error: ${response.status} ${response.statusText}`);
+        }
+      } catch (err) {
+        console.error("API 호출 실패:", err);
+        setTodayTasks([]);
       }
-    } catch (err) {
-      console.error("API 호출 실패:", err);
-      setTodayTasks([]);
-    }
-  };
+    };
 
-  apicall();
-}, [userNo, host, dispatch, token]);
-
-const handleEventClick = (info) => {
-  alert(`이벤트 제목: ${info.event.title}`);
-};
+    apicall();
+  }, [userNo, host, dispatch, token, reload]);
 
 
 
-return (
-  <>
-    <div className="home-title">
-      <h2>나의 플래너</h2>
-      {user !== null && `${user.userName}`}
-    </div>
-    <div className='main-container'>
-      <div id="calendar-container">
-        <FullCalendar
-          plugins={[dayGridPlugin]}
-          initialView="dayGridMonth"
-          timeZone="Asia/Seoul"
-          height="auto"
-          headerToolbar={{
-            start: "prev next",
-            center: "title",
-            end: "dayGridMonth threeDay",
-          }}
-          views={{
-            dayGridMonth: {
-              dayMaxEventRows: 3, // 하루에 최대 3개의 이벤트 행 표시 (초과되는 건 +more 로 표시됨)
-            },
-            dayGridWeek: {
-              titleFormat: { year: 'numeric', month: 'long' },
-              dayMaxEventRows: 3,
-            },
-            threeDay: {
-              type: "dayGrid",
-              duration: { days: 3 },
-              buttonText: "3일 보기",
-              dayMaxEventRows: 3,
-            }
-          }}
-          locale={'ko'}
-          dayHeaderFormat={{ weekday: 'short' }} // week header부분 요일만 출력
-          dayCellContent={({ date }) => {
-            return date.getDate();
-          }} // 7일 8일 => "일" 제거
-          events={events}
-          eventColor="#76c3c5" // 이벤트 기본 색상 설정
-          eventTextColor="#089196" // 이벤트 텍스트 색상 설정
-          eventBackgroundColor="#76c3c577" // 이벤트 배경 색상 설정
-          eventBorderColor="#76c3c5" // 이벤트 테두리 색상 설정
-          eventClick={handleEventClick} // 이벤트 클릭 시 콜백 함수 설정
-          eventContent={(data) => {
-            const title = data.event.title;
-            const contents = data.event.extendedProps.contents;
-            return (
-              <div className='fc-event-custom'>
-                <div className='fc-title'>{title}</div>
-                <div className='fc-contents'>
-                  {Array.isArray(contents) ? contents.map((line, i) => (
-                    <div key={i}>{line}</div>
-                  )) : <div>{contents}</div>}
-                </div>
-              </div>
-            );
-          }}
-        />
+  
+
+
+
+  return (
+    <>
+      <div className="home-title">
+        <h2>나의 플래너</h2>
+        {user !== null && `${user.userName}`}
       </div>
-      {/* 오늘 할일 섹션 */}
-      <div className="today-tasks-section">
-        <div className="tasks-header">
-          <h3>오늘 할일</h3>
-          <p className="today-date">{today}</p>
-        </div>
-
-        <div className="tasks-stats">
-          <div className="stat-item">
-            <span className="stat-number">{completedTasks}</span>
-            <span className="stat-label">완료</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-number">{remainingTasks}</span>
-            <span className="stat-label">남은 일</span>
-          </div>
-        </div>
-
-        <div className="add-task-section">
-          <input
-            type="text"
-            className="task-input"
-            value={newTask}
-            onChange={(e) => setNewTask(e.target.value)}
-            placeholder="새로운 할일을 입력하세요"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                addTask()
+      <div className='main-container'>
+        <div id="calendar-container">
+          <FullCalendar
+            plugins={[dayGridPlugin]}
+            initialView="dayGridMonth"
+            timeZone="Asia/Seoul"
+            height="auto"
+            headerToolbar={{
+              start: "prev next",
+              center: "title",
+              end: "dayGridMonth threeDay",
+            }}
+            views={{
+              dayGridMonth: {
+                dayMaxEventRows: 3, // 하루에 최대 3개의 이벤트 행 표시 (초과되는 건 +more 로 표시됨)
+              },
+              dayGridWeek: {
+                titleFormat: { year: 'numeric', month: 'long' },
+                dayMaxEventRows: 3,
+              },
+              threeDay: {
+                type: "dayGrid",
+                duration: { days: 3 },
+                buttonText: "3일 보기",
+                dayMaxEventRows: 3,
               }
             }}
+            locale={'ko'}
+            dayHeaderFormat={{ weekday: 'short' }} // week header부분 요일만 출력
+            dayCellContent={({ date }) => {
+              return date.getDate();
+            }} // 7일 8일 => "일" 제거
+            events={events}
+            eventColor="#76c3c5" // 이벤트 기본 색상 설정
+            eventTextColor="#089196" // 이벤트 텍스트 색상 설정
+            eventBackgroundColor="#76c3c577" // 이벤트 배경 색상 설정
+            eventBorderColor="#76c3c5" // 이벤트 테두리 색상 설정
+            eventClick={handleEventClick} // 이벤트 클릭 시 콜백 함수 설정
+            eventContent={(data) => {
+              const title = data.event.title;
+              const contents = data.event.extendedProps.contents;
+              return (
+                <div className='fc-event-custom'>
+                  <div className='fc-title'>{title}</div>
+                  <div className='fc-contents'>
+                    {Array.isArray(contents) ? contents.map((line, i) => (
+                      <div key={i}>{line}</div>
+                    )) : <div>{contents}</div>}
+                  </div>
+                </div>
+              );
+            }}
           />
-          <button className="add-btn" onClick={addTask}>
-            +
-          </button>
         </div>
-
-        <div className="tasks-list">
-          {todayTasks.map((task) => (
-            
-            <div key={task.id} className={`task-item ${task.status ? "completed" : ""}`}>
-              <div className="task-checkbox">
-                <input 
-                type="checkbox" 
-                checked={task.status} 
-                onClick={() => console.log("onCilc 발생",task.id)}
-                onChange={() => {
-                  console.log("체크박스 클릭!", task.id);
-                  toggleTaskStatus(task.id, task.planDayNo ,task.detailIndex)}} />
-                <span className="checkmark"></span>
-              </div>
-              <div className="task-content">
-                {editingTaskId === task.id ? (
-                  <input
-                    type='text'
-                    className='edit-input'
-                    value={editingText}
-                    onChange={(e) => setEditingText(e.target.value)}
-                    autoFocus
-                  />
-                ) : (
-                  <span className='task-text'>{task.task}</span>
-                )}
-
-                <div className={`task-status status-${task.status}`}></div>
-              </div>
-
-              <div>
-                {editingTaskId === task.id ? (
-                  <>
-                    <button className='save-btn' onClick={() => {
-                      const [planDayNo, detailIndexStr] = task.id.split('-');
-                      const detailIndex = parseInt(detailIndexStr, 10);
-                      saveEdit(task.id, planDayNo,detailIndex);
-                      }} title="저장">
-                      ✓
-                    </button>
-                    <button className='cancle-btn' onClick={cancelEditing} title="취소">
-                      ✕
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button className='edit-btn' onClick={() => startEditing(task.id, task.task)} title='수정'>
-                      ✏️
-                    </button>
-                    <button className='delete-btn' onClick={() => deleteTask(task.id)} title="삭제">
-                      ×
-                    </button>
-                  </>
-                )}
-              </div>
+        
+        {/* 할일 리스트 - 이벤트를 클릭했을 때만 보이도록 */}
+        {selectedTasks.length > 0 && (
+          <div className="today-tasks-section">
+            <div className="tasks-header">
+              <button className='close-btn' onClick={() => setSelectedTasks([])}>✖ 닫기</button>
+              <h3>할일 리스트</h3>
+              <p className="today-date">{today}</p>
             </div>
-          ))}
 
-          {todayTasks.length === 0 && (
-            <div className="empty-tasks">
-              <p>오늘 할일이 없습니다.</p>
-              <p>새로운 할일을 추가해보세요!</p>
+            <div className="add-task-section">
+              <input
+                type="text"
+                className="task-input"
+                value={newTask}
+                onChange={(e) => setNewTask(e.target.value)}
+                placeholder="새로운 할일을 입력하세요"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    addTask();
+                  }
+                }}
+              />
+              <button className="add-btn" onClick={addTask}>+</button>
             </div>
-          )}
-        </div>
+
+            <div className="tasks-list">
+              {selectedTasks.map((task) => (
+                <div key={task.id} className={`task-item ${task.status ? "completed" : ""}`}>
+                  <div className="task-control">
+                    <ArrowUp
+                    size={15}
+                    onClick={() => moveTask(task.planDayNo, task.detailIndex, "up")}
+                    className='task-arrow'
+                    />
+                    <ArrowDown
+                    size={15}
+                    onClick={() => moveTask(task.planDayNo, task.detailIndex, "down")}
+                    className='task-arrow'
+                    />
+                  </div>
+
+                  <div className="task-content">
+                    {editingTaskId === task.id ? (
+                      <input
+                        type='text'
+                        className='edit-input'
+                        value={editingText}
+                        onChange={(e) => setEditingText(e.target.value)}
+                        autoFocus
+                      />
+                    ) : (
+                      <span className='task-text'>{task.task}</span>
+                    )}
+                  </div>
+
+                  <div>
+                    {editingTaskId === task.id ? (
+                      <>
+                        <button className='save-btn' onClick={() => {
+                          const [planDayNo, detailIndexStr] = task.id.split('-');
+                          const detailIndex = parseInt(detailIndexStr, 10);
+                          saveEdit(task.id, planDayNo, detailIndex);
+                        }}>✓</button>
+                        <button className='cancle-btn' onClick={cancelEditing}>✕</button>
+                      </>
+                    ) : (
+                      <>
+                        <button className='edit-btn' onClick={() => startEditing(task.id, task.task)}>✏️</button>
+                        <button className='delete-btn' onClick={() => deleteTask(task.id, task.planDayNo, task.detailIndex)}>×</button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              {selectedTasks.length === 0 && (
+                <div className="empty-tasks">
+                  <p>할일이 없습니다.</p>
+                  <p>새로운 할일을 추가해보세요!</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
       </div>
-    </div>
-  </>
-)
-}
+    </>
+  )
 
+}
 export default Home

@@ -100,7 +100,25 @@
     padding: 0 1rem;
 }
 
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    background: transparent;
+    border: none;
+    font-size: 15px;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.2s ease;
+    z-index: 100;
+}
+
+.close-btn:hover {
+    color: #333;
+}
+
 .today-tasks-section {
+    position: relative;
     flex: 1;
     min-width: 320px;
     border-radius: 12px;
@@ -128,6 +146,19 @@
     margin: 0;
 }
 
+.today-tasks-section {
+    flex: 1;
+    min-width: 320px;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 50px;
+    height: fit-content;
+    position: sticky;
+    top: 2rem;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
 .tasks-stats {
     display: flex;
     justify-content: space-around;
@@ -135,6 +166,7 @@
     padding: 1rem;
     border-radius: 8px;
     color: white;
+    background: linear-gradient(135deg, #76c3c5, #089196);
 }
 
 .stat-item {
@@ -151,6 +183,7 @@
 .stat-label {
     font-size: 0.8rem;
     opacity: 0.9;
+    color: white;
 }
 
 .add-task-section {
@@ -266,6 +299,24 @@
     margin-left: 0.5rem;
 }
 
+.task-controls {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    margin-right: 8px;
+}
+
+.task-arrow {
+    cursor: pointer;
+    color: #666;
+    transition: color 0.2s ease;
+}
+
+.task-arrow:hover {
+    color: #000;
+}
+
 .edit-btn {
     background: none;
     border: none;
@@ -291,7 +342,7 @@
     border-radius: 4px;
     font-size: 14px;
     transition: all 0.2s ease;
-    
+
 }
 
 .cancel-btn:hover {
