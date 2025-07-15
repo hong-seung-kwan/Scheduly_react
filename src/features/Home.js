@@ -39,7 +39,7 @@ const Home = () => {
       id: `${planDayNo}-${index}`,
       planDayNo: planDayNo,
       task: detail.detail,
-      status: detail.datailStatus === "FINISHED",
+      status: detail.detailStatus === "FINISHED",
       detailIndex: index
     }));
     setSelectedTasks(taskList);
@@ -53,26 +53,25 @@ const Home = () => {
         planDayNo: planDayNo,
         content: newTask.trim()
       };
-      console.log("Sending add request with data:", newDetail);
       const response = await axios.post(`${host}/addJson`, newDetail, {
         headers: {
           Authorization: token
         }
       });
-      console.log("Response from server:", response.data);
       const save = response.data;
 
       const newTaskItem = {
         id: `${planDayNo}-${save.detailIndex}`,
         planDayNo: planDayNo,
         detailIndex: save.detailIndex,
-        task: save.detail,
+        task: save.detail || newTask.trim(),
         status: save.detailStatus === "FINISHED"
       };
-
-      setSelectedTasks(prev => [...prev, newTaskItem]);
+      const updatedTasks = [...selectedTasks, newTaskItem]
+      setSelectedTasks(updatedTasks);
       setNewTask("");
 
+      setReload(prev => !prev);
     } catch (err) {
       console.log("추가 실패", err);
     }
@@ -98,6 +97,7 @@ const Home = () => {
       });
 
       setSelectedTasks((tasks) =>
+        
         tasks.map((task) =>
           task.id === id ? { ...task, status: updateStatus } : task
         )
@@ -120,6 +120,7 @@ const Home = () => {
         }
       })
       setSelectedTasks((tasks) => tasks.filter((task) => task.id !== taskId));
+      setReload(prev => !prev);
     } catch (error) {
       console.log("삭제 실패: ", error);
     }
@@ -158,6 +159,8 @@ const Home = () => {
         );
         setEditingTaskId(null);
         setEditingText("");
+
+        setReload(prev => !prev);
       } catch (err) {
         console.log("수정 실패", err);
       }
@@ -179,7 +182,24 @@ const Home = () => {
         }
       });
 
-      setReload(prev => !prev);
+      setSelectedTasks(prev => {
+      const copied = [...prev];
+      const idx = copied.findIndex(t => t.detailIndex === detailIndex);
+
+      if (direction === 'up' && idx > 0) {
+        [copied[idx], copied[idx - 1]] = [copied[idx - 1], copied[idx]];
+      } else if (direction === 'down' && idx < copied.length - 1) {
+        [copied[idx], copied[idx + 1]] = [copied[idx + 1], copied[idx]];
+      }
+
+      
+      return copied.map((task, i) => ({
+        ...task,
+        detailIndex: i,
+        id: `${task.planDayNo}-${i}`
+      }));
+    });
+    setReload(prev => !prev);
     } catch(err) {
       console.log("이동 실패", err);
     }
@@ -253,10 +273,6 @@ const Home = () => {
 
 
 
-  
-
-
-
   return (
     <>
       <div className="home-title">
@@ -264,7 +280,7 @@ const Home = () => {
         {user !== null && `${user.userName}`}
       </div>
       <div className='main-container'>
-        <div id="calendar-container">
+        <div id="calendar-container" className={selectedTasks.length === 0 ? "full" : "shrink"}>
           <FullCalendar
             plugins={[dayGridPlugin]}
             initialView="dayGridMonth"
@@ -286,7 +302,7 @@ const Home = () => {
               threeDay: {
                 type: "dayGrid",
                 duration: { days: 3 },
-                buttonText: "3일 보기",
+                buttonText: "3days",
                 dayMaxEventRows: 3,
               }
             }}
@@ -345,16 +361,24 @@ const Home = () => {
 
             <div className="tasks-list">
               {selectedTasks.map((task) => (
-                <div key={task.id} className={`task-item ${task.status ? "completed" : ""}`}>
+                
+                <div key={task.id} 
+                className={`task-item ${task.status ? "completed" : ""}`}
+                onClick={() => toggleTaskStatus(task.id,task.planDayNo, task.detailIndex)}
+                >
                   <div className="task-control">
                     <ArrowUp
                     size={15}
-                    onClick={() => moveTask(task.planDayNo, task.detailIndex, "up")}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      moveTask(task.planDayNo, task.detailIndex, "up")}}
                     className='task-arrow'
                     />
                     <ArrowDown
                     size={15}
-                    onClick={() => moveTask(task.planDayNo, task.detailIndex, "down")}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      moveTask(task.planDayNo, task.detailIndex, "down")}}
                     className='task-arrow'
                     />
                   </div>
@@ -369,7 +393,7 @@ const Home = () => {
                         autoFocus
                       />
                     ) : (
-                      <span className='task-text'>{task.task}</span>
+                      <span className='task-text' >{task.task}</span>
                     )}
                   </div>
 

@@ -1,0 +1,262 @@
+.board-container {
+  min-height: 100vh;
+  background-color: #f9fafb;
+  padding: 1.5rem;
+}
+
+.board-wrapper {
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+/* Header Styles */
+.board-header {
+  margin-bottom: 2rem;
+}
+
+.board-title-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.board-icon {
+  width: 2rem;
+  height: 2rem;
+  background-color: #0d9488;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.board-icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: white;
+}
+
+.board-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.board-description {
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Card Styles */
+.board-card {
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border: none;
+}
+
+.board-card-header {
+  border-bottom: 1px solid #f3f4f6;
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+}
+
+.board-card-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.board-card-content {
+  padding: 0;
+}
+
+/* Loading Styles */
+.loading-container {
+  padding: 2rem;
+  text-align: center;
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+  border-radius: 50%;
+  height: 2rem;
+  width: 2rem;
+  border: 2px solid transparent;
+  border-bottom: 2px solid #0d9488;
+  margin: 0 auto;
+}
+
+.loading-text {
+  color: #6b7280;
+  margin-top: 0.5rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Board Item Styles */
+.board-items {
+  border-top: none;
+}
+
+.board-item {
+  padding: 1.5rem;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.board-item:hover {
+  background-color: #f9fafb;
+}
+
+.board-item:last-child {
+  border-bottom: none;
+}
+
+.board-item-content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.board-item-main {
+  flex: 1;
+}
+
+.board-item-title {
+  font-weight: 500;
+  color: #111827;
+  margin-bottom: 0.5rem;
+  transition: color 0.2s ease;
+}
+
+.board-item:hover .board-item-title {
+  color: #0d9488;
+}
+
+.board-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.board-item-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.board-item-meta-item svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Badge Styles */
+.board-badge {
+  background-color: #f0fdfa;
+  color: #0f766e;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid #a7f3d0;
+}
+
+.board-badge:hover {
+  background-color: #ccfbf1;
+}
+
+/* Pagination Styles */
+.pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+.pagination-button {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #f9fafb;
+}
+
+.pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-button.active {
+  background-color: #0d9488;
+  border-color: #0d9488;
+  color: white;
+}
+
+.pagination-button.active:hover {
+  background-color: #0f766e;
+}
+
+.pagination-numbers {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.pagination-button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .board-container {
+    padding: 1rem;
+  }
+
+  .board-item-content {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .board-item-meta {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .pagination-container {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 640px) {
+  .board-title {
+    font-size: 1.25rem;
+  }
+
+  .board-item {
+    padding: 1rem;
+  }
+
+  .board-item-meta {
+    font-size: 0.8rem;
+  }
+}

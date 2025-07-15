@@ -1,4 +1,4 @@
-import { Calendar, CheckSquare, Home, LogIn, LogOut, Plus, UserPen } from 'lucide-react'
+import { Calendar, CardSim, CheckSquare, Home, LogIn, LogOut, Plus, UserPen } from 'lucide-react'
 import React, { useState } from 'react'
 import "../css/Sidebar.css";
 import { Link, useNavigate } from 'react-router-dom';
@@ -31,11 +31,12 @@ const Sidebar = () => {
 
     const navigation = [
         { name: "홈 화면", href: "/", icon: Home, current: true },
-        { name: "회원가입", href: "/register", icon: UserPen, current: false },
+        
         isLogIn
             ? { name: "로그아웃", href: "/", icon: LogOut, current: false }
-            : { name: "로그인", href: "/login", icon: LogIn, current: false },
-        { name: "할 일", href: "#", icon: CheckSquare, current: false },
+            : ({ name: "로그인", href: "/login", icon: LogIn, current: false },
+              { name: "회원가입", href: "/register", icon: UserPen, current: false }),
+        { name: "게시판", href: "/board/main", icon: CardSim, current: false },
         { name: "캘린더", href: "#", icon: Calendar, current: false },
         { name: "API", href: "#", icon: Plus, current: false }
 

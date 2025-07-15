@@ -4,6 +4,7 @@ import Layout from "./components/Layout";
 import Home from "./features/Home";
 import Register from "./features/Register";
 import Login from "./features/Login";
+import Board from "./features/Board";
 
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
           <Route path='/' element={<Home></Home>}></Route>
           <Route path='/register' element={<Register></Register>}></Route>
           <Route path='/login' element={<Login></Login>}></Route>
+          <Route path='/board/main' element={<Board/>}></Route>
           <Route path='/board/list' element={" "}></Route>
           <Route path='/board/register' element={" "}></Route>
           <Route path='/board/read' element={" "}></Route>

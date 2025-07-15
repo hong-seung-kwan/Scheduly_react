@@ -1,7 +1,11 @@
 @charset "utf-8";
 
+#calendar-container.full {
+    width: 1200px;
+    margin: 50px auto;
+}
 
-#calendar-container {
+#calendar-container.shrink {
     width: 800px;
     margin: 50px auto;
 }
@@ -299,9 +303,8 @@
     margin-left: 0.5rem;
 }
 
-.task-controls {
+.task-control {
     display: flex;
-    flex-direction: column;
     justify-content: center;
     gap: 4px;
     margin-right: 8px;
