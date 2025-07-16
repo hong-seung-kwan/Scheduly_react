@@ -225,7 +225,16 @@ const Home = () => {
             Authorization: token
           }
         });
+        const colors = ['#76c3c577', '#c3767655', '#7676c377'];
+        const colorMap = {};
 
+        function getColorForPlanNo(planNo) {
+          if (!colorMap[planNo]) {
+            const colorIndex = Object.keys(colorMap).length % colors.length;
+            colorMap[planNo] = colors[colorIndex];
+          }
+          return colorMap[planNo];
+        }
         if (response.status === 200) {
           const eventsData = response.data.map(planDay => ({
             id: planDay.planDayNo,
@@ -234,6 +243,7 @@ const Home = () => {
             start: planDay.planDayDate,
             end: planDay.planDayDate,
             rawDetails: planDay.details,
+            backgroundColor: getColorForPlanNo(planDay.planNo)
           }));
 
           dispatch(setEvents(eventsData));
@@ -364,7 +374,7 @@ const Home = () => {
                 
                 <div key={task.id} 
                 className={`task-item ${task.status ? "completed" : ""}`}
-                onClick={() => toggleTaskStatus(task.id,task.planDayNo, task.detailIndex)}
+                // onClick={() => toggleTaskStatus(task.id,task.planDayNo, task.detailIndex)}
                 >
                   <div className="task-control">
                     <ArrowUp

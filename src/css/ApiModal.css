@@ -12,8 +12,8 @@
 
 .modal-container {
   background-color: #ffffff;
-  width: 350px;
-  height: 300px;
+  width: 600px;
+  height: 450px;
   border: 1px solid #cccccc;
   border-radius: 20px;
   padding: 20px;
@@ -106,15 +106,18 @@
   margin-bottom: 10px;
   padding: 10px 14px;
   border-radius: 12px;
+  width: fit-content;
   max-width: 80%;
   word-break: break-word;
   font-size: 14px;
+  white-space: pre-line; 
 }
 
 .chat-message.user {
   background-color: #d0f0fd;
   align-self: flex-end;
   text-align: right;
+  margin-left: auto;
 }
 
 .chat-message.system {
