@@ -14,6 +14,7 @@ const Sidebar = () => {
     const [openModal, setOpenModal] = useState(false);
 
     const user = useSelector((state) => state.member.info);
+    const token = useSelector((state) => state.member.token);
     const isLogIn = !!user;
 
     const dispatch = useDispatch();
@@ -31,16 +32,57 @@ const Sidebar = () => {
 
     const navigation = [
         { name: "홈 화면", href: "/", icon: Home, current: true },
-        
+
         isLogIn
             ? { name: "로그아웃", href: "/", icon: LogOut, current: false }
             : ({ name: "로그인", href: "/login", icon: LogIn, current: false },
-              { name: "회원가입", href: "/register", icon: UserPen, current: false }),
+                { name: "회원가입", href: "/register", icon: UserPen, current: false }),
         { name: "게시판", href: "/board/main", icon: CardSim, current: false },
         { name: "캘린더", href: "#", icon: Calendar, current: false },
         { name: "API", href: "#", icon: Plus, current: false }
 
     ]
+
+    const handleApiAccess = async () => {
+        if (!user) {
+            alert("로그인이 필요합니다.");
+            navigate("/login");
+            return;
+        }
+
+        if (user.role === "free") {
+            const goPay = window.confirm("이 기능은 결제가 필요합니다. 결제 페이지로 이동할까요?");
+            if (goPay) {
+                // 결제 준비 요청 보내고 리디렉션
+                try {
+                    const response = await fetch("http://localhost:8080/kakao/ready", {
+                        method: "POST",
+                        headers: {
+                            Authorization: token,
+                            "Content-Type": "application/json"
+                        }
+                    });
+                    const data = await response.json();
+                    console.log("kakao ready response", data);
+
+                    if(!data.next_redirect_pc_url) {
+                        alert("결제 페이지 URL을 받아오지 못했습니다");
+                        return;
+                    }
+
+                    localStorage.setItem("kakao_tid", data.tid);
+                    localStorage.setItem("userNo", user.userNo); // 승인용 정보 저장
+
+                    window.location.href = data.next_redirect_pc_url;
+                } catch (error) {
+                    console.error("결제 준비 실패", error);
+                    alert("결제 준비 중 오류가 발생했습니다.");
+                }
+            }
+        } else {
+            setOpenModal(true); // 유료 사용자만 모달 열기
+        }
+    };
 
 
 
@@ -65,7 +107,7 @@ const Sidebar = () => {
                             </button>
                         ) : item.name === "API" ? (
                             <li key={item.name} className='navItem'>
-                                <button className='navButton' onClick={() => setOpenModal(true)}>
+                                <button className='navButton' onClick={handleApiAccess}>
                                     <item.icon className='navIcon' />
                                     {item.name}
                                 </button>

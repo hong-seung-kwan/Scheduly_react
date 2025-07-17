@@ -17,6 +17,7 @@ export const Modal = ({ openModal, setOpenModal }) => {
 
   const handleSend = async () => {
     
+    
     setChatMessages(prev => [...prev, { sender: "user", text: message }]);
     if (chatMessages.length === 0) {
       try {
@@ -32,7 +33,14 @@ export const Modal = ({ openModal, setOpenModal }) => {
         const replyText = [
           plan.study,
           "",
-          ...plan.list.map(item => `${item.date}: ${item.content}`)
+          ...plan.list.map(item => {
+            const detailsText = item.details
+            .map(detail => ` -${detail.detail}`)
+            .join("\n");
+
+            return `${item.date}: ${item.content}\n${detailsText}`;
+          }) 
+          
         ].join("\n");
         setChatMessages(prev => [...prev, { sender: "system", text: replyText }]);
         setMessage("");
@@ -49,20 +57,29 @@ export const Modal = ({ openModal, setOpenModal }) => {
         }
 
         const response = await axios.post(`${host}/gpt/fixPlan`, JSON.stringify(body), {
+          
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: token,
             "Content-Type": "application/json"
           }
         });
         const plan = response.data;
-        setCurrentPlan(JSON.stringify(plan))
+        setCurrentPlan(plan)
         const replyText = [
           plan.study,
           "",
-          ...plan.list.map(item => `${item.date}: ${item.content}`)
+          ...plan.list.map(item => {
+            const detailsText = item.details
+            .map(detail => ` -${detail.detail}`)
+            .join("\n");
+
+            return `${item.date}: ${item.content}\n${detailsText}`;
+          }) 
+          
         ].join("\n");
         setChatMessages(prev => [...prev, { sender: "system", text: replyText }]);
         setMessage("");
+        console.log(typeof currentPlan);
 
       } catch (error) {
         console.error("에러 발생:", error);
@@ -74,35 +91,30 @@ export const Modal = ({ openModal, setOpenModal }) => {
 
 
   const handleSave = async () => {
-    setChatMessages(prev => [...prev, { sender: "user", text: message }]);
-    try {
-      // 1. GPT에게 계획 생성 요청
-      const response = await axios.post(`${host}/gpt/savePlan`, message, {
-        headers: {
-          Authorization: token,
-          "Content-Type": "application/json",
-        },
-      });
-      const plan = JSON.parse(response.data.message);
-      const replyText = [
-        plan.study,
-        "",
-        ...plan.list.map(item => `${item.date}: ${item.content}`)
-      ].join("\n");
-      setChatMessages(prev => [...prev, { sender: "system", text: replyText }]);
-      setMessage("");
+  try {
+    const response = await axios.post(`${host}/gpt/savePlan`, currentPlan, {
+      headers: {
+        Authorization: token,
+        "Content-Type": "application/json"
+      }
+    });
 
-      setReload(prev => !prev);
-    } catch (error) {
-      console.error("에러 발생:", error);
-      alert("플랜 등록에 실패했습니다.");
-    }
-  };
+    const planNo = response.data;
+    alert("플랜이 저장되었습니다!");
+    
+
+  } catch (error) {
+    console.error("플랜 저장 실패:", error);
+    alert("플랜 저장 실패");
+  }
+};
+
 
 
   return (
     <div className="overlay">
       <div className="modal-container">
+        <button className='close-btn' onClick={() => {setOpenModal(false)}}>✖</button>
         <h2>API</h2>
         <div className="chat-box">
           {chatMessages.map((msg, index) => (
@@ -119,10 +131,8 @@ export const Modal = ({ openModal, setOpenModal }) => {
             onChange={(e) => setMessage(e.target.value)}
             placeholder="예: 정보처리기사 2주간 공부 계획 짜줘"
           ></input>
-          <button className="cancle" type="button" onClick={() => {
-            setOpenModal(false);
-          }}>취소</button>
-          <button className="send-button" onClick={handleSend}>확인</button>
+          <button className="send-button" onClick={handleSend}>전송</button>
+          <button className="send-button" onClick={handleSave}>저장</button>
         </div>
 
       </div>

@@ -23,6 +23,8 @@ const Home = () => {
   const [editingText, setEditingText] = useState("")
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [reload, setReload] = useState(false);
+  const [selectTitle, setSelectTitle] = useState("");
+  const [selectDate, setSelectDate] = useState("");
 
   const today = new Date().toLocaleDateString("ko-KR", {
     year: "numeric",
@@ -34,15 +36,21 @@ const Home = () => {
   const handleEventClick = (info) => {
     const rawDetails = info.event.extendedProps.rawDetails;
     const planDayNo = info.event.id;
+    const planDayContent = info.event.title;
+    const planDayDate = info.event.startStr;
 
     const taskList = rawDetails.map((detail, index) => ({
       id: `${planDayNo}-${index}`,
       planDayNo: planDayNo,
       task: detail.detail,
       status: detail.detailStatus === "FINISHED",
-      detailIndex: index
+      detailIndex: index,
+      date: planDayDate,
+      title: planDayContent
     }));
     setSelectedTasks(taskList);
+    setSelectTitle(planDayContent);
+    setSelectDate(planDayDate);
   };
   // 추가
   const addTask = async () => {
@@ -348,9 +356,12 @@ const Home = () => {
         {selectedTasks.length > 0 && (
           <div className="today-tasks-section">
             <div className="tasks-header">
-              <button className='close-btn' onClick={() => setSelectedTasks([])}>✖ 닫기</button>
-              <h3>할일 리스트</h3>
-              <p className="today-date">{today}</p>
+              <button className='close-btn' onClick={() => {
+                setSelectedTasks([]);
+                setSelectTitle("");
+              }}>✖ 닫기</button>
+              <h3>{selectTitle}</h3>
+              <p className="today-date">{selectDate}</p>
             </div>
 
             <div className="add-task-section">
@@ -374,7 +385,7 @@ const Home = () => {
                 
                 <div key={task.id} 
                 className={`task-item ${task.status ? "completed" : ""}`}
-                // onClick={() => toggleTaskStatus(task.id,task.planDayNo, task.detailIndex)}
+                onClick={() => toggleTaskStatus(task.id,task.planDayNo, task.detailIndex)}
                 >
                   <div className="task-control">
                     <ArrowUp
@@ -410,17 +421,18 @@ const Home = () => {
                   <div>
                     {editingTaskId === task.id ? (
                       <>
-                        <button className='save-btn' onClick={() => {
+                        <button className='save-btn' onClick={(e) => {
+                          e.stopPropagation();
                           const [planDayNo, detailIndexStr] = task.id.split('-');
                           const detailIndex = parseInt(detailIndexStr, 10);
                           saveEdit(task.id, planDayNo, detailIndex);
                         }}>✓</button>
-                        <button className='cancle-btn' onClick={cancelEditing}>✕</button>
+                        <button className='cancle-btn' onClick={(e) => { e.stopPropagation(); cancelEditing() }}>✕</button>
                       </>
                     ) : (
                       <>
-                        <button className='edit-btn' onClick={() => startEditing(task.id, task.task)}>✏️</button>
-                        <button className='delete-btn' onClick={() => deleteTask(task.id, task.planDayNo, task.detailIndex)}>×</button>
+                        <button className='edit-btn' onClick={(e) => { e.stopPropagation(); startEditing(task.id, task.task)}}>✏️</button>
+                        <button className='delete-btn' onClick={(e) => { e.stopPropagation(); deleteTask(task.id, task.planDayNo, task.detailIndex)}}>×</button>
                       </>
                     )}
                   </div>

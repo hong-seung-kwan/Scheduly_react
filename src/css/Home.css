@@ -253,6 +253,7 @@
 
 .task-item.completed .task-text {
     text-decoration: line-through;
+    text-decoration-color: red;
     color: #6c757d;
 }
 
@@ -320,7 +321,7 @@
     color: #000;
 }
 
-.edit-btn {
+.edit-btn, .save-btn {
     background: none;
     border: none;
     color: #007bff;
@@ -331,12 +332,12 @@
     transition: all 0.2s ease;
 }
 
-.edit-btn:hover {
+.edit-btn:hover, .save-btn:hover {
     background: #e3f2fd;
     color: #0056b3;
 }
 
-.cancel-btn {
+.cancle-btn {
     background: none;
     border: none;
     color: #6c757d;
@@ -348,7 +349,7 @@
 
 }
 
-.cancel-btn:hover {
+.cancle-btn:hover {
     background: #e2e6ea;
     color: #495057;
 }
