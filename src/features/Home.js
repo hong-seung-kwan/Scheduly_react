@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
 import "../css/Home.css";
 import axios from "axios";
 import { Context } from '../index';
@@ -25,6 +26,9 @@ const Home = () => {
   const [reload, setReload] = useState(false);
   const [selectTitle, setSelectTitle] = useState("");
   const [selectDate, setSelectDate] = useState("");
+  const [selectPlanDayNo, setSelectPlanDayNo] = useState(null);
+  const [myPlan, setMyPlan] = useState([]);
+
 
   const today = new Date().toLocaleDateString("ko-KR", {
     year: "numeric",
@@ -38,6 +42,8 @@ const Home = () => {
     const planDayNo = info.event.id;
     const planDayContent = info.event.title;
     const planDayDate = info.event.startStr;
+
+    setSelectPlanDayNo(planDayNo);
 
     const taskList = rawDetails.map((detail, index) => ({
       id: `${planDayNo}-${index}`,
@@ -54,11 +60,10 @@ const Home = () => {
   };
   // 추가
   const addTask = async () => {
-    const planDayNo = selectedTasks[0].planDayNo;
 
     try {
       const newDetail = {
-        planDayNo: planDayNo,
+        planDayNo: selectPlanDayNo,
         content: newTask.trim()
       };
       const response = await axios.post(`${host}/addJson`, newDetail, {
@@ -68,9 +73,11 @@ const Home = () => {
       });
       const save = response.data;
 
+      console.log('addJson response:', save);
+
       const newTaskItem = {
-        id: `${planDayNo}-${save.detailIndex}`,
-        planDayNo: planDayNo,
+        id: `${selectPlanDayNo}-${save.detailIndex}`,
+        planDayNo: selectPlanDayNo,
         detailIndex: save.detailIndex,
         task: save.detail || newTask.trim(),
         status: save.detailStatus === "FINISHED"
@@ -105,7 +112,7 @@ const Home = () => {
       });
 
       setSelectedTasks((tasks) =>
-        
+
         tasks.map((task) =>
           task.id === id ? { ...task, status: updateStatus } : task
         )
@@ -127,8 +134,15 @@ const Home = () => {
           Authorization: token
         }
       })
-      setSelectedTasks((tasks) => tasks.filter((task) => task.id !== taskId));
+      const updatedTasks = selectedTasks.filter((task) => task.id !== taskId);
+      setSelectedTasks(updatedTasks);
+      if (updatedTasks.length === 0) {
+        // setSelectTitle("");
+        setSelectPlanDayNo(null);
+
+      }
       setReload(prev => !prev);
+
     } catch (error) {
       console.log("삭제 실패: ", error);
     }
@@ -180,36 +194,80 @@ const Home = () => {
     console.log(`[순서 이동 요청] planDayNo: ${planDayNo}, detailIndex: ${detailIndex}, 방향: ${direction}`);
 
     try {
-      await axios.post(`${host}/moveJson`,{
+      await axios.post(`${host}/moveJson`, {
         planDayNo,
         detailIndex,
-        move:direction
-      },{
+        move: direction
+      }, {
         headers: {
           Authorization: token
         }
       });
 
       setSelectedTasks(prev => {
-      const copied = [...prev];
-      const idx = copied.findIndex(t => t.detailIndex === detailIndex);
+        const copied = [...prev];
+        const idx = copied.findIndex(t => t.detailIndex === detailIndex);
 
-      if (direction === 'up' && idx > 0) {
-        [copied[idx], copied[idx - 1]] = [copied[idx - 1], copied[idx]];
-      } else if (direction === 'down' && idx < copied.length - 1) {
-        [copied[idx], copied[idx + 1]] = [copied[idx + 1], copied[idx]];
-      }
+        if (direction === 'up' && idx > 0) {
+          [copied[idx], copied[idx - 1]] = [copied[idx - 1], copied[idx]];
+        } else if (direction === 'down' && idx < copied.length - 1) {
+          [copied[idx], copied[idx + 1]] = [copied[idx + 1], copied[idx]];
+        }
 
-      
-      return copied.map((task, i) => ({
-        ...task,
-        detailIndex: i,
-        id: `${task.planDayNo}-${i}`
-      }));
-    });
-    setReload(prev => !prev);
-    } catch(err) {
+
+        return copied.map((task, i) => ({
+          ...task,
+          detailIndex: i,
+          id: `${task.planDayNo}-${i}`
+        }));
+      });
+      setReload(prev => !prev);
+    } catch (err) {
       console.log("이동 실패", err);
+    }
+  }
+
+  const moveDate = async (info) => {
+    const planDayNo = info.event.id;
+    const newDate = info.event.start;
+
+    const date = newDate.toISOString().split('T')[0];
+
+    try {
+      await axios.post(`${host}/moveDate`, {
+        planDayNo,
+        newDate: date
+      }, {
+        headers: {
+          Authorization: token
+        }
+      });
+      setReload(prev => !prev);
+    } catch (error) {
+      console.log("실패", error);
+      info.revert();
+    }
+  }
+
+  const handlemyPlan = async () => {
+    try {
+      const response = await axios.get(`${host}/plan/list`, {
+        headers: {
+          authorization: token
+        }
+      });
+
+      if (response.status === 200) {
+        const Plans = response.data.map(plan => ({
+          id: plan.planNo,
+          name: plan.planName,
+          Planstatus: plan.status
+        }));
+
+        setMyPlan(Plans);
+      }
+    } catch (error) {
+      console.error("플랜 데이터 불러오기실패", error);
     }
   }
 
@@ -222,7 +280,7 @@ const Home = () => {
       setTodayTasks([]);
       return;
     }
-    if (selectedTasks.length === 0 && todayTasks.length > 0) {
+    if (selectedTasks.length === 0 && todayTasks.length > 0 && !selectTitle) {
       setSelectedTasks(todayTasks);
     }
 
@@ -297,10 +355,19 @@ const Home = () => {
         <h2>나의 플래너</h2>
         {user !== null && `${user.userName}`}
       </div>
+      <button className="my-schedule-btn" onClick={() => {
+        setMyPlan(true);
+        setSelectedTasks([]);
+        setSelectTitle("");
+        setSelectPlanDayNo(null);
+        handlemyPlan();
+      }}>
+        📅 내 일정
+      </button>
       <div className='main-container'>
         <div id="calendar-container" className={selectedTasks.length === 0 ? "full" : "shrink"}>
           <FullCalendar
-            plugins={[dayGridPlugin]}
+            plugins={[dayGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
             timeZone="Asia/Seoul"
             height="auto"
@@ -349,19 +416,22 @@ const Home = () => {
                 </div>
               );
             }}
+            editable={true}
+            eventDrop={moveDate}
           />
         </div>
-        
+
         {/* 할일 리스트 - 이벤트를 클릭했을 때만 보이도록 */}
-        {selectedTasks.length > 0 && (
+        {selectTitle && (
           <div className="today-tasks-section">
             <div className="tasks-header">
               <button className='close-btn' onClick={() => {
                 setSelectedTasks([]);
                 setSelectTitle("");
+                setSelectPlanDayNo(null);
               }}>✖ 닫기</button>
               <h3>{selectTitle}</h3>
-              <p className="today-date">{selectDate}</p>
+              {/* <p className="today-date">{selectDate}</p> */}
             </div>
 
             <div className="add-task-section">
@@ -381,65 +451,69 @@ const Home = () => {
             </div>
 
             <div className="tasks-list">
-              {selectedTasks.map((task) => (
-                
-                <div key={task.id} 
-                className={`task-item ${task.status ? "completed" : ""}`}
-                onClick={() => toggleTaskStatus(task.id,task.planDayNo, task.detailIndex)}
-                >
-                  <div className="task-control">
-                    <ArrowUp
-                    size={15}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      moveTask(task.planDayNo, task.detailIndex, "up")}}
-                    className='task-arrow'
-                    />
-                    <ArrowDown
-                    size={15}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      moveTask(task.planDayNo, task.detailIndex, "down")}}
-                    className='task-arrow'
-                    />
-                  </div>
-
-                  <div className="task-content">
-                    {editingTaskId === task.id ? (
-                      <input
-                        type='text'
-                        className='edit-input'
-                        value={editingText}
-                        onChange={(e) => setEditingText(e.target.value)}
-                        autoFocus
-                      />
-                    ) : (
-                      <span className='task-text' >{task.task}</span>
-                    )}
-                  </div>
-
-                  <div>
-                    {editingTaskId === task.id ? (
-                      <>
-                        <button className='save-btn' onClick={(e) => {
+              {selectedTasks.length > 0 ? (
+                selectedTasks.map((task) => (
+                  <div key={task.id}
+                    className={`task-item ${task.status ? "completed" : ""}`}
+                    onClick={() => toggleTaskStatus(task.id, task.planDayNo, task.detailIndex)}
+                  >
+                    {/* task control */}
+                    <div className="task-control">
+                      <ArrowUp
+                        size={15}
+                        onClick={(e) => {
                           e.stopPropagation();
-                          const [planDayNo, detailIndexStr] = task.id.split('-');
-                          const detailIndex = parseInt(detailIndexStr, 10);
-                          saveEdit(task.id, planDayNo, detailIndex);
-                        }}>✓</button>
-                        <button className='cancle-btn' onClick={(e) => { e.stopPropagation(); cancelEditing() }}>✕</button>
-                      </>
-                    ) : (
-                      <>
-                        <button className='edit-btn' onClick={(e) => { e.stopPropagation(); startEditing(task.id, task.task)}}>✏️</button>
-                        <button className='delete-btn' onClick={(e) => { e.stopPropagation(); deleteTask(task.id, task.planDayNo, task.detailIndex)}}>×</button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
+                          moveTask(task.planDayNo, task.detailIndex, "up");
+                        }}
+                        className='task-arrow'
+                      />
+                      <ArrowDown
+                        size={15}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          moveTask(task.planDayNo, task.detailIndex, "down");
+                        }}
+                        className='task-arrow'
+                      />
+                    </div>
 
-              {selectedTasks.length === 0 && (
+                    {/* task content */}
+                    <div className="task-content">
+                      {editingTaskId === task.id ? (
+                        <input
+                          type='text'
+                          className='edit-input'
+                          value={editingText}
+                          onChange={(e) => setEditingText(e.target.value)}
+                          autoFocus
+                        />
+                      ) : (
+                        <span className='task-text'>{task.task}</span>
+                      )}
+                    </div>
+
+                    {/* buttons */}
+                    <div>
+                      {editingTaskId === task.id ? (
+                        <>
+                          <button className='save-btn' onClick={(e) => {
+                            e.stopPropagation();
+                            const [planDayNo, detailIndexStr] = task.id.split('-');
+                            const detailIndex = parseInt(detailIndexStr, 10);
+                            saveEdit(task.id, planDayNo, detailIndex);
+                          }}>✓</button>
+                          <button className='cancle-btn' onClick={(e) => { e.stopPropagation(); cancelEditing() }}>✕</button>
+                        </>
+                      ) : (
+                        <>
+                          <button className='edit-btn' onClick={(e) => { e.stopPropagation(); startEditing(task.id, task.task) }}>✏️</button>
+                          <button className='delete-btn' onClick={(e) => { e.stopPropagation(); deleteTask(task.id, task.planDayNo, task.detailIndex) }}>×</button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
                 <div className="empty-tasks">
                   <p>할일이 없습니다.</p>
                   <p>새로운 할일을 추가해보세요!</p>
@@ -448,6 +522,55 @@ const Home = () => {
             </div>
           </div>
         )}
+        {myPlan && (
+          <div className="today-tasks-section">
+            <div className="tasks-header">
+              <button className='close-btn' onClick={() => {
+                setMyPlan(false);
+              }}>✖ 닫기</button>
+              <h3>내 일정</h3>
+            </div>
+
+            <div className="tasks-list">
+              {myPlan.length > 0 ? (
+                myPlan.map((plan) => (
+                  <div key={plan.id} className="task-item">
+                    <div className="task-content">
+                      <span className='task-text'>{plan.name}</span>
+                    </div>
+
+                    <div>
+                      <button
+                        className='edit-btn'
+                        onClick={""}
+                      >✏️</button>
+
+                      <button
+                        className='delete-btn'
+                        onClick={""}
+                      >×</button>
+
+                      <button
+                        className='save-btn'
+                        onClick={""}
+                      >
+                        {plan.Planstatus === "FINISHED" ? "⏪ 진행" : "✅ 완료"}
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="empty-tasks">
+                  <p>플랜이 없습니다.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+
+
+
 
       </div>
     </>

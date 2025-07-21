@@ -121,7 +121,7 @@
     color: #333;
 }
 
-.today-tasks-section {
+/* .today-tasks-section {
     position: relative;
     flex: 1;
     min-width: 320px;
@@ -130,7 +130,7 @@
     height: fit-content;
     position: sticky;
     top: 2rem;
-}
+} */
 
 .tasks-header {
     margin-bottom: 1.5rem;
@@ -152,7 +152,7 @@
 
 .today-tasks-section {
     flex: 1;
-    min-width: 320px;
+    min-width: 536px;
     border-radius: 12px;
     padding: 1.5rem;
     margin-top: 50px;
@@ -321,7 +321,8 @@
     color: #000;
 }
 
-.edit-btn, .save-btn {
+.edit-btn,
+.save-btn {
     background: none;
     border: none;
     color: #007bff;
@@ -332,12 +333,13 @@
     transition: all 0.2s ease;
 }
 
-.edit-btn:hover, .save-btn:hover {
+.edit-btn:hover,
+.save-btn:hover {
     background: #e3f2fd;
     color: #0056b3;
 }
 
-.cancle-btn {
+.cancel-btn {
     background: none;
     border: none;
     color: #6c757d;
@@ -349,7 +351,7 @@
 
 }
 
-.cancle-btn:hover {
+.cancel-btn:hover {
     background: #e2e6ea;
     color: #495057;
 }
@@ -396,4 +398,36 @@
 .empty-tasks p:last-child {
     font-size: 0.9rem;
     opacity: 0.8;
+}
+
+.my-schedule-btn {
+    position: fixed;
+    /* top: 2rem; */
+    bottom: 2rem;
+    right: 2rem;
+    /* background: linear-gradient(135deg, #76c3c5, #089196); */
+    background: #089196;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(118, 195, 197, 0.3);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+.myplan-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.my plan-list li {
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    background: #f3f6fa;
+    border-radius: 6px;
+    font-weight: 500;
+    color: #333;
 }

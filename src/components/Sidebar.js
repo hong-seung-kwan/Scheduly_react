@@ -31,17 +31,17 @@ const Sidebar = () => {
     }
 
     const navigation = [
-        { name: "홈 화면", href: "/", icon: Home, current: true },
-
+        { name: "홈 화면", href: "/", icon: Home},
+        !isLogIn &&{ name: "회원가입", href: "/register", icon: UserPen},
         isLogIn
-            ? { name: "로그아웃", href: "/", icon: LogOut, current: false }
-            : ({ name: "로그인", href: "/login", icon: LogIn, current: false },
-                { name: "회원가입", href: "/register", icon: UserPen, current: false }),
-        { name: "게시판", href: "/board/main", icon: CardSim, current: false },
-        { name: "캘린더", href: "#", icon: Calendar, current: false },
-        { name: "API", href: "#", icon: Plus, current: false }
+            ? { name: "로그아웃", href: "/", icon: LogOut}
+            : { name: "로그인", href: "/login", icon: LogIn},
+                
+        { name: "게시판", href: "/board/main", icon: CardSim},
+        { name: "캘린더", href: "/plan/listview", icon: Calendar},
+        { name: "API", href: "#", icon: Plus}
 
-    ]
+    ].filter(Boolean);
 
     const handleApiAccess = async () => {
         if (!user) {
@@ -60,7 +60,10 @@ const Sidebar = () => {
                         headers: {
                             Authorization: token,
                             "Content-Type": "application/json"
-                        }
+                        },
+                        body: JSON.stringify({
+                            userNo: user.userNo
+                        })
                     });
                     const data = await response.json();
                     console.log("kakao ready response", data);

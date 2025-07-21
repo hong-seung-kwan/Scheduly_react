@@ -51,8 +51,11 @@
 }
 .input-with-icon {
     position: relative;
+    /* padding-left: 40px; */
 }
-
+.input-with-icon input {
+    padding-left: 40px;
+}
 .input-icon {
     position: absolute;
     left: 14px;

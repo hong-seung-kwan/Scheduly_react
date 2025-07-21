@@ -1,0 +1,266 @@
+.plans-tab-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.plans-tab-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.plans-tab-header h2 {
+  color: #089196;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.plans-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 1rem;
+}
+
+.plan-tab {
+  padding: 0.75rem 1.5rem;
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  font-weight: 500;
+  color: #6c757d;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.plan-tab:hover {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.plan-tab.active {
+  background: #089196;
+  color: white;
+  border-color: #089196;
+  transform: translateY(-2px);
+}
+
+.plan-tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #089196;
+}
+
+.plan-tab-badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  margin-left: 0.5rem;
+}
+
+.plan-tab:not(.active) .plan-tab-badge {
+  background: #76c3c5;
+  color: white;
+}
+
+.plan-detail-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  min-height: 400px;
+}
+
+.plan-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f8f9fa;
+}
+
+.plan-detail-title {
+  color: #089196;
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.plan-detail-stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.plan-detail-stat {
+  text-align: center;
+  padding: 0.5rem 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.plan-detail-stat-number {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #089196;
+}
+
+.plan-detail-stat-label {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.plan-dates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.plan-date-card {
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fafafa;
+}
+
+.plan-date-header {
+  background: linear-gradient(135deg, #76c3c5, #089196);
+  color: white;
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.plan-date-content {
+  padding: 1.5rem;
+}
+
+.plan-date-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.plan-date-task {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  background: white;
+  border-radius: 8px;
+  border-left: 4px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.plan-date-task:hover {
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.plan-date-task.completed {
+  border-left-color: #28a745;
+  background: #f8fff8;
+}
+
+.plan-date-task.completed .plan-date-task-text {
+  text-decoration: line-through;
+  color: #6c757d;
+}
+
+.plan-date-task-checkbox {
+  position: relative;
+  margin-right: 1rem;
+  cursor: pointer;
+}
+
+.plan-date-task-checkbox input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+}
+
+.plan-date-checkmark {
+  display: block;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border: 2px solid #76c3c5;
+  border-radius: 4px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.plan-date-task-checkbox input[type="checkbox"]:checked + .plan-date-checkmark {
+  background: #76c3c5;
+}
+
+.plan-date-task-checkbox input[type="checkbox"]:checked + .plan-date-checkmark::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.plan-date-task-content {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.plan-date-task-text {
+  flex: 1;
+  margin-right: 1rem;
+  font-size: 1rem;
+}
+
+.plan-date-task-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.plan-date-edit-input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 2px solid #76c3c5;
+  border-radius: 4px;
+  font-size: 1rem;
+  outline: none;
+  margin-right: 1rem;
+}
+
+.empty-plan-detail {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6c757d;
+}
+
+.empty-plan-detail h3 {
+  color: #089196;
+  margin-bottom: 1rem;
+}
+
+.no-dates {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-top: 1rem;
+}

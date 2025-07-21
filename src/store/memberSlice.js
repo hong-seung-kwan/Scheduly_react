@@ -24,8 +24,13 @@ export const memberSlice = createSlice({
 
             localStorage.removeItem('token');
             localStorage.removeItem('user');
+        },
+
+        updateUserInfo: (state, action) => {
+            state.info = action.payload;
+            localStorage.setItem('user', JSON.stringify(action.payload));
         }
     }
 });
 
-export const {login, logout} = memberSlice.actions;
+export const {login, logout, updateUserInfo} = memberSlice.actions;
