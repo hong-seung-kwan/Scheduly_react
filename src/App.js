@@ -28,7 +28,7 @@ function App() {
           <Route path='/plan/register' element={<PlanRegister/>}></Route>
           <Route path='/plan/modify' element={" "}></Route>
           <Route path='/plan/calendar' element={" "}></Route>
-          <Route path='/plan/listview' element={<PlanListView/>}></Route>
+          <Route path='/plan/listview/:planNo' element={<PlanListView/>}></Route>
           <Route path='/pay/success' element={<PaySuccess/>}></Route>
           <Route path='/pay/cancel' element={" "}></Route>
           <Route path='/pay/fail' element={" "}></Route> 

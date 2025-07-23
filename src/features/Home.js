@@ -8,6 +8,7 @@ import { Context } from '../index';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearEvents, setEvents } from '../store/eventSlice';
 import { ArrowDown, ArrowUp } from 'lucide-react';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 const Home = () => {
 
@@ -15,6 +16,7 @@ const Home = () => {
   const token = useSelector((state) => state.member.token);
   // const [events, setEvents] = useState([]);
   const events = useSelector((state) => state.events);
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { host } = useContext(Context)
   const [todayTasks, setTodayTasks] = useState([])
@@ -44,6 +46,7 @@ const Home = () => {
     const planDayDate = info.event.startStr;
 
     setSelectPlanDayNo(planDayNo);
+    setMyPlan(false);
 
     const taskList = rawDetails.map((detail, index) => ({
       id: `${planDayNo}-${index}`,
@@ -278,6 +281,10 @@ const Home = () => {
     if (!userNo) {
       dispatch(clearEvents());
       setTodayTasks([]);
+      // setMyPlan(false);
+      // setSelectTitle("");
+      // setSelectedTasks([]);
+      // setSelectPlanDayNo(null);
       return;
     }
     if (selectedTasks.length === 0 && todayTasks.length > 0 && !selectTitle) {
@@ -291,15 +298,17 @@ const Home = () => {
             Authorization: token
           }
         });
-        const colors = ['#76c3c577', '#c3767655', '#7676c377'];
+        const colors = ['#76c3c577', '#c3767655', '#7676c377','#E6CCFF','	#FFE5B4','#B3DDF2','	#F5FFFA'];
+        
         const colorMap = {};
 
-        function getColorForPlanNo(planNo) {
-          if (!colorMap[planNo]) {
+        function getColorForPlanNo(planNo, date) {
+          const key = `${planNo}-${date}`;
+          if (!colorMap[key]) {
             const colorIndex = Object.keys(colorMap).length % colors.length;
-            colorMap[planNo] = colors[colorIndex];
+            colorMap[key] = colors[colorIndex];
           }
-          return colorMap[planNo];
+          return colorMap[key];
         }
         if (response.status === 200) {
           const eventsData = response.data.map(planDay => ({
@@ -343,6 +352,11 @@ const Home = () => {
         setTodayTasks([]);
       }
     };
+
+    setMyPlan(false);
+    setSelectTitle("");
+    setSelectedTasks([]);
+    setSelectPlanDayNo(null);
 
     apicall();
   }, [userNo, host, dispatch, token, reload]);
@@ -422,7 +436,7 @@ const Home = () => {
         </div>
 
         {/* 할일 리스트 - 이벤트를 클릭했을 때만 보이도록 */}
-        {selectTitle && (
+        {selectTitle && !myPlan && (
           <div className="today-tasks-section">
             <div className="tasks-header">
               <button className='close-btn' onClick={() => {
@@ -522,7 +536,7 @@ const Home = () => {
             </div>
           </div>
         )}
-        {myPlan && (
+        {myPlan && !selectTitle && (
           <div className="today-tasks-section">
             <div className="tasks-header">
               <button className='close-btn' onClick={() => {
@@ -536,23 +550,33 @@ const Home = () => {
                 myPlan.map((plan) => (
                   <div key={plan.id} className="task-item">
                     <div className="task-content">
-                      <span className='task-text'>{plan.name}</span>
+                      <span 
+                        className='task-text'
+                        onClick={() => {
+                          console.log(plan);
+                          navigate(`/plan/listview/${plan.id}`,{
+                          state: {planName: plan.name}
+                          
+                        })
+                      }}
+                         style={{ cursor: "pointer", color: "#0077cc", textDecoration: "underline" }}
+                        >{plan.name}</span>
                     </div>
 
                     <div>
                       <button
                         className='edit-btn'
-                        onClick={""}
+                        // onClick={""}
                       >✏️</button>
 
                       <button
                         className='delete-btn'
-                        onClick={""}
+                        // onClick={""}
                       >×</button>
 
                       <button
                         className='save-btn'
-                        onClick={""}
+                        // onClick={""}
                       >
                         {plan.Planstatus === "FINISHED" ? "⏪ 진행" : "✅ 완료"}
                       </button>
