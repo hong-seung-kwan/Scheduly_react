@@ -38,7 +38,7 @@ const Sidebar = () => {
             : { name: "로그인", href: "/login", icon: LogIn},
                 
         { name: "게시판", href: "/board/main", icon: CardSim},
-        { name: "캘린더", href: "/plan/listview", icon: Calendar},
+        { name: "일정 추가", href: "/plan/register", icon: Plus},
         { name: "API", href: "#", icon: Plus}
 
     ].filter(Boolean);
@@ -67,6 +67,7 @@ const Sidebar = () => {
                     });
                     const data = await response.json();
                     console.log("kakao ready response", data);
+                    console.log("token:", token);
 
                     if(!data.next_redirect_pc_url) {
                         alert("결제 페이지 URL을 받아오지 못했습니다");

@@ -278,6 +278,9 @@ const Home = () => {
 
   useEffect(() => {
 
+    console.log("userNo in useEffect:", userNo);
+    console.log("token in useEffect:", token);
+
     if (!userNo) {
       dispatch(clearEvents());
       setTodayTasks([]);
@@ -298,8 +301,8 @@ const Home = () => {
             Authorization: token
           }
         });
-        const colors = ['#76c3c577', '#c3767655', '#7676c377','#E6CCFF','	#FFE5B4','#B3DDF2','	#F5FFFA'];
-        
+        const colors = ['#76c3c577', '#c3767655', '#7676c377', '#E6CCFF', '	#FFE5B4', '#B3DDF2', '	#F5FFFA'];
+
         const colorMap = {};
 
         function getColorForPlanNo(planNo, date) {
@@ -366,7 +369,7 @@ const Home = () => {
   return (
     <>
       <div className="home-title">
-        <h2>나의 플래너</h2>
+        <h2 style={{ marginTop: "10px" }}>나의 플래너</h2>
         {user !== null && `${user.userName}`}
       </div>
       <button className="my-schedule-btn" onClick={() => {
@@ -536,7 +539,7 @@ const Home = () => {
             </div>
           </div>
         )}
-        {myPlan && !selectTitle && (
+        {user && myPlan && !selectTitle && (
           <div className="today-tasks-section">
             <div className="tasks-header">
               <button className='close-btn' onClick={() => {
@@ -550,35 +553,35 @@ const Home = () => {
                 myPlan.map((plan) => (
                   <div key={plan.id} className="task-item">
                     <div className="task-content">
-                      <span 
+                      <span
                         className='task-text'
                         onClick={() => {
                           console.log(plan);
-                          navigate(`/plan/listview/${plan.id}`,{
-                          state: {planName: plan.name}
-                          
-                        })
-                      }}
-                         style={{ cursor: "pointer", color: "#0077cc", textDecoration: "underline" }}
-                        >{plan.name}</span>
+                          navigate(`/plan/listview/${plan.id}`, {
+                            state: { planName: plan.name }
+
+                          })
+                        }}
+                        style={{ cursor: "pointer", textDecoration: "underline" }}
+                      >{plan.name}</span>
                     </div>
 
                     <div>
                       <button
                         className='edit-btn'
-                        // onClick={""}
+                      // onClick={""}
                       >✏️</button>
 
                       <button
                         className='delete-btn'
-                        // onClick={""}
+                      // onClick={""}
                       >×</button>
 
                       <button
                         className='save-btn'
-                        // onClick={""}
+                      // onClick={""}
                       >
-                        {plan.Planstatus === "FINISHED" ? "⏪ 진행" : "✅ 완료"}
+                        {plan.Planstatus === "FINISHED" ? "✅ 완료" : "⏪ 진행"}
                       </button>
                     </div>
                   </div>

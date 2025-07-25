@@ -1,10 +1,10 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import "../css/ApiModal.css";
 import { useSelector } from "react-redux";
 import { Context } from "..";
 import axios from "axios";
 
-export const Modal = ({ openModal, setOpenModal }) => {
+export const Modal = ({ openModal, setOpenModal , sharedPlan}) => {
 
   const [message, setMessage] = useState("");
   const user = useSelector((state) => state.member.info);
@@ -30,6 +30,7 @@ export const Modal = ({ openModal, setOpenModal }) => {
         const plan = response.data;
 
         setCurrentPlan(JSON.stringify(plan));
+        
         const replyText = [
           plan.study,
           "",
@@ -53,7 +54,7 @@ export const Modal = ({ openModal, setOpenModal }) => {
 
         const body = {
           userOrder: message,
-          gptJson: currentPlan,
+          gptJson: JSON.stringify(currentPlan),
         }
 
         const response = await axios.post(`${host}/gpt/fixPlan`, JSON.stringify(body), {
@@ -108,6 +109,24 @@ export const Modal = ({ openModal, setOpenModal }) => {
     alert("플랜 저장 실패");
   }
 };
+
+useEffect(() => {
+  if(sharedPlan && sharedPlan.study && sharedPlan.list) {
+    const replyText = [
+      sharedPlan.study,
+      "",
+      ...sharedPlan.list.map(item => {
+        const detailsText = item.details
+          .map(detail => ` -${detail.detail}`)
+          .join("\n");
+        return `${item.date}: ${item.content}\n${detailsText}`;
+      })
+    ].join("\n")
+
+    setChatMessages([{ sender: "system", text:replyText}]);
+    setCurrentPlan(sharedPlan);
+  }
+},[sharedPlan]);
 
 
 

@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { Calendar, ChevronLeft, ChevronRight, MessageSquare, ThumbsUp, User } from 'lucide-react';
 import { formatDate } from '@fullcalendar/core/index.js';
 import "../css/Board.css";
+import { useNavigate } from 'react-router-dom';
 
 const Board = () => {
   const user = useSelector((state) => state.member.info);
@@ -13,6 +14,11 @@ const Board = () => {
   const [board, setBoard] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPage, setTotalPage] = useState(0);
+  const navigate = useNavigate();
+
+  const goToDetail = (boardNo) => {
+    navigate(`/board/read/${boardNo}`);
+  }
 
   useEffect(() => {
     fetchBoard(page);
@@ -50,30 +56,30 @@ const Board = () => {
             <h2 className='board-card-title'>전체 게시글</h2>
           </div>
           <div className="board-card-content">
-              <div className='board-items'>
-                {board.map((board) => (
-                  <div key={board.boardNo} className='board-item'>
-                    <div className='board-item-content'>
-                      <div className='board-item-main'>
-                        <h3 className='board-item-title'>{board.boardName}</h3>
-                        <div className='board-item-meta'>
-                          <div className='board-item-meta-item'>
-                            <Calendar />
-                            <span>{formatDate(board.boardTime)}</span>
-                          </div>
-                          <div className='board-item-meta-item'>
-                            <ThumbsUp />
-                            <span>좋아요 {board.likeCount}</span>
-                          </div>
+            <div className='board-items'>
+              {board.map((board) => (
+                <div key={board.boardNo} className='board-item' onClick={() => goToDetail(board.boardNo)}>
+                  <div className='board-item-content'>
+                    <div className='board-item-main'>
+                      <h3 className='board-item-title'>{board.boardName}</h3>
+                      <div className='board-item-meta'>
+                        <div className='board-item-meta-item'>
+                          <Calendar />
+                          <span>{formatDate(board.boardTime)}</span>
+                        </div>
+                        <div className='board-item-meta-item'>
+                          <ThumbsUp />
+                          <span>좋아요 {board.likeCount}</span>
                         </div>
                       </div>
-                      <div className='board-badge'>
-                        {board.likeCount > 10 ? "인기" : "일반"}
-                      </div>
+                    </div>
+                    <div className='board-badge'>
+                      {board.likeCount > 10 ? "인기" : "일반"}
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
         {totalPage > 1 && (

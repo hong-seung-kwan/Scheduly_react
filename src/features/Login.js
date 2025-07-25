@@ -53,12 +53,13 @@ const Login = () => {
             });
 
             if (response.status === 200) {
-                const { token, userId, userName, role} = response.data;
+                const { token, userNo, userId, userName, role} = response.data;
 
                 axios.defaults.headers.common['Authorization'] = `${token}`;
                 dispatch(login({
                     token: token,
                     user: {
+                        userNo,
                         userId,
                         userName,
                         role

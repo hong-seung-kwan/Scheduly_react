@@ -508,6 +508,7 @@ const PlanListView = () => {
                                                 selected={new Date(dayData.date)}
                                                 onChange={(date) => reArray(planNo, date)}
                                                 dateFormat="yyyy-MM-dd"
+                                                
                                                 locale="ko"
                                                 customInput={
                                                     <button className='date-action-btn' title='날짜 변경' style={{marginLeft:'5px', padding:'5px'}}>📅</button>
