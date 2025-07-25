@@ -49,6 +49,28 @@
   margin: 0;
 }
 
+.sort-select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  background: white;
+  font-size: 0.875rem;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+}
+
+.sort-select:focus {
+  outline: none;
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
+
+.sort-select:hover {
+  border-color: #9ca3af;
+}
+
 /* Card Styles */
 .board-card {
   background: white;
@@ -59,6 +81,8 @@
 
 .board-card-header {
   border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  justify-content: space-between;
   padding: 1.5rem 1.5rem 1rem 1.5rem;
 }
 
@@ -66,7 +90,29 @@
   font-size: 1.125rem;
   font-weight: 600;
   color: #111827;
-  margin: 0;
+  margin-top: 1rem;
+  margin-bottom: 3rem;
+}
+
+.board-card-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.3rem 1.3rem;
+  color: #0f766e;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 1rem;
+  box-shadow: 0;
+  border: 1px solid #a7f3d0;
+  background: #f0fdfa;
+  height: 3.5rem;
+  width: 4.5rem;
+}
+
+.board-card-btn:hover {
+  background: #ccfbf1;
 }
 
 .board-card-content {

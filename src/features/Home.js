@@ -8,7 +8,8 @@ import { Context } from '../index';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearEvents, setEvents } from '../store/eventSlice';
 import { ArrowDown, ArrowUp } from 'lucide-react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Modal } from './ApiModal';
 
 const Home = () => {
 
@@ -30,6 +31,7 @@ const Home = () => {
   const [selectDate, setSelectDate] = useState("");
   const [selectPlanDayNo, setSelectPlanDayNo] = useState(null);
   const [myPlan, setMyPlan] = useState([]);
+  const plans = useSelector((state) => state.plan.plans);
 
 
   const today = new Date().toLocaleDateString("ko-KR", {
@@ -278,9 +280,6 @@ const Home = () => {
 
   useEffect(() => {
 
-    console.log("userNo in useEffect:", userNo);
-    console.log("token in useEffect:", token);
-
     if (!userNo) {
       dispatch(clearEvents());
       setTodayTasks([]);
@@ -361,8 +360,18 @@ const Home = () => {
     setSelectedTasks([]);
     setSelectPlanDayNo(null);
 
+
+    const events = plans.flatMap(plan =>
+      plan.list.map(item => ({
+        title: item.comtent,
+        start: item.date,
+      }))
+
+    );
+    dispatch(setEvents(events));
+
     apicall();
-  }, [userNo, host, dispatch, token, reload]);
+  }, [userNo, host, dispatch, token, reload, plans]);
 
 
 
@@ -595,6 +604,7 @@ const Home = () => {
           </div>
         )}
 
+        
 
 
 

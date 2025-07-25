@@ -85,6 +85,7 @@ const Sidebar = () => {
             }
         } else {
             setOpenModal(true); // 유료 사용자만 모달 열기
+            
         }
     };
 

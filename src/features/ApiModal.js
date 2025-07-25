@@ -1,10 +1,11 @@
 import { useContext, useEffect, useState } from "react";
 import "../css/ApiModal.css";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Context } from "..";
 import axios from "axios";
+import { addPlan } from "../store/planSlice";
 
-export const Modal = ({ openModal, setOpenModal , sharedPlan}) => {
+export const Modal = ({ openModal, setOpenModal , sharedPlan }) => {
 
   const [message, setMessage] = useState("");
   const user = useSelector((state) => state.member.info);
@@ -12,6 +13,7 @@ export const Modal = ({ openModal, setOpenModal , sharedPlan}) => {
   const [reload, setReload] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [currentPlan, setCurrentPlan] = useState([]);
+  const dispatch = useDispatch();
 
   const { host } = useContext(Context)
 
@@ -102,6 +104,7 @@ export const Modal = ({ openModal, setOpenModal , sharedPlan}) => {
 
     const planNo = response.data;
     alert("플랜이 저장되었습니다!");
+    dispatch(addPlan({...currentPlan, planNo}));
     
 
   } catch (error) {

@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { useContext, useEffect, useState } from 'react';
 import { Context } from '..';
 import { useSelector } from 'react-redux';
-import { Calendar, ChevronLeft, ChevronRight, MessageSquare, ThumbsUp, User } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, MessageSquare, Plus, ThumbsUp, User } from 'lucide-react';
 import { formatDate } from '@fullcalendar/core/index.js';
 import "../css/Board.css";
 import { useNavigate } from 'react-router-dom';
@@ -13,30 +13,38 @@ const Board = () => {
   const { host } = useContext(Context);
   const [board, setBoard] = useState([]);
   const [page, setPage] = useState(0);
+  const [sort, setSort] = useState('');
   const [totalPage, setTotalPage] = useState(0);
   const navigate = useNavigate();
-
   const goToDetail = (boardNo) => {
     navigate(`/board/read/${boardNo}`);
   }
-
   useEffect(() => {
     fetchBoard(page);
-  }, [page]);
-
+  }, [page, sort]);
 
   const fetchBoard = async (pageNumber) => {
     try {
-      const res = await axios.get(`${host}/board/main?page=${pageNumber}`,
-        {
-          headers: { Authorization: token }
-        });
+      const res = await axios.get(`${host}/board/main`, {
+        params: {
+          page: pageNumber,
+          sort: sort,
+        },
+        headers: { Authorization: token }
+
+      });
       setBoard(res.data.list);
       setTotalPage(res.data.totalPage);
     } catch (err) {
       console.error('실패', err);
     }
   };
+
+  const handleSortChange = (e) => {
+    setSort(e.target.value);
+    setPage(0);
+  }
+
 
   return (
     <div className='board-container'>
@@ -48,12 +56,19 @@ const Board = () => {
             </div>
             <h1 className='board-title'>게시판</h1>
           </div>
-          <p className='board-description'>플랜 업로드</p>
+          <p className='board-description'>플랜 공유</p>
         </div>
 
         <div className='board-card'>
           <div className='board-card-header'>
-            <h2 className='board-card-title'>전체 게시글</h2>
+            <div>
+              <h2 className='board-card-title'>전체 게시글</h2>
+              정렬 기준 <select className='sort-select' value={sort} onChange={(e)=>{handleSortChange(e)}}>
+                <option selected value="boardTime">날짜순</option>
+                <option value="likeCount">좋아요순</option>
+              </select>
+            </div>
+            <button className='board-card-btn' onClick={() => navigate("/board/register")}><Plus />등록</button>
           </div>
           <div className="board-card-content">
             <div className='board-items'>
@@ -65,7 +80,9 @@ const Board = () => {
                       <div className='board-item-meta'>
                         <div className='board-item-meta-item'>
                           <Calendar />
-                          <span>{formatDate(board.boardTime)}</span>
+                          <span>{formatDate(board.boardTime, {
+                            locale: 'kor'
+                          })}</span>
                         </div>
                         <div className='board-item-meta-item'>
                           <ThumbsUp />
