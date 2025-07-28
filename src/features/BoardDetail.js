@@ -21,6 +21,7 @@ const BoardDetail = () => {
   const [expandedPlan, setExpandedPlan] = useState(false);
   const [expandedDetails, setExpandedDetails] = useState(new Set());
   const [openModal, setOpenModal] = useState(false);
+  const [liked, setLiked] = useState(false);
   const navigate = useNavigate();
   useEffect(() => {
     fetchBoardDetail(boardNo);
@@ -28,13 +29,20 @@ const BoardDetail = () => {
   useEffect(() => {
     fetchComment(boardNo);
   }, [boardNo]);
-
+  useEffect(() => {
+    if(token) {
+      fetchLikedStatus();
+    } else{
+      setLiked(false);
+    }
+  }, [boardNo, token])
   const fetchBoardDetail = async (boardNo) => {
     try {
       const res = await axios.get(`${host}/board/detail?boardNo=${boardNo}`, {
         headers: { Authorization: token }
       });
       setBoard(res.data);
+      
       const apiRes = await axios.get(`${host}/board/apiPlan?apiPlanNo=${res.data.apiPlan}`, {
         headers: { Authorization: token }
       });
@@ -62,8 +70,28 @@ const BoardDetail = () => {
           }
         })
       fetchBoardDetail(boardNo)
+      setLiked(prev => !prev);
+      
+
+
     } catch (err) { console.error('실패', err); }
   }
+
+  const fetchLikedStatus = async () => {
+    try {
+      const res = await axios.get(`${host}/like/like?boardNo=${boardNo}`,{
+        headers: {
+          Authorization: token
+        }
+      })
+      setLiked(res.data);
+
+    }catch(err) {
+      console.log("좋아요 불러오기 실패", err);
+    }
+  }
+
+
 
   const handleExpandedDetails = (detailNo) => {
     setExpandedDetails((before) => {
@@ -170,7 +198,7 @@ const BoardDetail = () => {
           </div>
           <div className="comment-actions">
             <button className="comment-action-btn" onClick={() => setReplyingTo(replyingTo === comment.commentNo ? null : comment.commentNo)}><Reply className="btn-icon" />댓글</button>
-            {user.userName === comment.userName && !comment.deleteStatus && (
+            {user?.userName === comment?.userName && user.userName === comment.userName && !comment.deleteStatus && (
               <button className="comment-delete-btn" onClick={()=> {if(window.confirm("삭제하시겠습니까?")){handleCommentDelete(comment.commentNo)}}}>
                 <X className="btn-icon" />삭제
               </button>
@@ -285,8 +313,12 @@ const BoardDetail = () => {
                 </div>
               )}
             </div>
-            <button className="recommendation-btn" onClick={() => { like() }}>
-              <ThumbsUp className="recommendation-icon" />
+            <button 
+              className="recommendation-btn" 
+              onClick={() => { like() }}
+              style={{color: liked ? "blue" : "black"}}
+              >
+              <ThumbsUp className="recommendation-icon"/>
               <span className="recommendation-count">{board.likeCount}</span>
             </button>
             {/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}

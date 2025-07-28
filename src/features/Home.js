@@ -7,7 +7,7 @@ import axios from "axios";
 import { Context } from '../index';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearEvents, setEvents } from '../store/eventSlice';
-import { ArrowDown, ArrowUp, Pencil, Trash2, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, Check, Pencil, Trash2, X } from 'lucide-react';
 import { Modal } from './ApiModal';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
@@ -431,6 +431,7 @@ const Home = () => {
             start: planDay.planDayDate,
             end: planDay.planDayDate,
             rawDetails: planDay.details,
+            status:planDay.status,
             backgroundColor: getColorForPlanNo(planDay.planNo)
           }));
           dispatch(setEvents(eventsData));
@@ -470,8 +471,7 @@ const Home = () => {
     <>
       <div className="home-title">
         
-        <h2 style={{ marginTop: "10px" }}>나의 플래너</h2>
-        {user !== null && `${user.userName}`}
+        <h2 style={{ marginTop: "10px" }}>{user !== null ? `${user.userName}의 플래너`: "로그인 후 이용하세요"}</h2>
       </div>
       <button className="my-schedule-btn" onClick={() => {
         setMyPlan(true);
@@ -523,11 +523,13 @@ const Home = () => {
             eventContent={(data) => {
               const title = data.event.title;
               const contents = data.event.extendedProps.contents;
+              const status = data.event.extendedProps.status;
               return (
                 <div className='fc-event-custom'>
                   <div className='fc-title'>{title}</div>
                   <div className='fc-contents'>
-                    {Array.isArray(contents) ? contents.map((line, i) => (
+                    {status==="FINISHED" ? <div className='finished'><Check />완료됨</div> :
+                    Array.isArray(contents) ? contents.map((line, i) => (
                       <div key={i}>{line}</div>
                     )) : <div>{contents}</div>}
                   </div>
@@ -560,12 +562,12 @@ const Home = () => {
                 onChange={(e) => setNewTask(e.target.value)}
                 placeholder="새로운 할일을 입력하세요"
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") {
+                  if (e.key === "Enter"&&newTask!=="") {
                     addTask();
                   }
                 }}
               />
-              <button className="add-btn" onClick={addTask}>+</button>
+              <button className="add-btn" onClick={newTask!=="" ? addTask: null}>+</button>
             </div>
 
             <div className="tasks-list">
@@ -754,9 +756,14 @@ const Home = () => {
                             <X />
                           </button>
 
-                          <button className='save-btn'>
+                          <span
+                          style={{
+                            color:plan.Planstatus === "FINISHED" ? "red" : "#007bff",
+                            fontSize:"14px",
+                            marginLeft:"5px"
+                          }}>
                             {plan.Planstatus === "FINISHED" ? "완료" : "진행"}
-                          </button>
+                          </span>
                         </>
                       )}
                     </div>

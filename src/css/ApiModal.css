@@ -84,6 +84,12 @@
   cursor: pointer;
   transition: all 0.2s ease;
 }
+.cancel-btn:disabled,
+.send-btn:disabled,
+.cancel-btn:disabled:hover,
+.send-btn:disabled:hover {
+  background-color: #999999;
+}
 
 .cancel-btn {
   background-color: #f44336;
@@ -138,4 +144,7 @@
   width: 100%;
   justify-content: space-evenly;
   padding-top: 12px;
+}
+.custom-tooltip {
+  font-size: 5px;
 }

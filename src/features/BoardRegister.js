@@ -17,8 +17,8 @@ const BoardRegister = () => {
     boardName: '',
     boardContent: ''
   });
+  const [apiPlanName, setapiPlanName] = useState('');
   const navigate = useNavigate();
-
   useEffect(() => {
     fetchAPIPlan();
   }, []);
@@ -107,10 +107,11 @@ const BoardRegister = () => {
           <div className='cards-container'>
             <div className='cards-scroll'>
               {apiPlan.map((plan) => (
-                <div key={plan.apiPlanNo} onClick={() => handleGroupChange(plan.apiPlanNo)} className={`card ${selectedApiPlan === plan.apiPlanNo ? "selected" : ""}`}>
+                <div key={plan.apiPlanNo} onClick={() => {handleGroupChange(plan.apiPlanNo); setapiPlanName(plan.apiPlanContentList.study);}} className={`card ${selectedApiPlan === plan.apiPlanNo ? "selected" : ""}`}>
                   <div className='card-header'>
                     <h3 className='card-title'>{plan.apiPlanContentList.study}</h3>
-                    <button className='card-expand-btn' onClick={(e) => handlePlanExpand(plan.apiPlanNo, e)}>
+                    <button className='card-expand-btn' onClick={(e) => {handlePlanExpand(plan.apiPlanNo, e); 
+                    }}>
                       <ChevronDown className={`card-expand-icon ${isPlanExtanded(plan.apiPlanNo) ? "expanded" : ""}`} />
                     </button>
                   </div>
@@ -155,8 +156,8 @@ const BoardRegister = () => {
             게시글 정보
           </h2>
           <div className="form-group">
-            <label className="form-label">선택된 플랜ID</label>
-            <input type="number" className="form-input" value={board.apiPlan} placeholder="플랜을 선택하세요" readOnly/>
+            <label className="form-label">선택된 플랜</label>
+            <input type="text" className="form-input" value={apiPlanName} placeholder="플랜을 선택하세요" readOnly/>
           </div>
 
           <div className="form-group">

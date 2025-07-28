@@ -39,8 +39,8 @@ const Sidebar = ({onSaveSuccess}) => {
             : { name: "로그인", href: "/login", icon: LogIn },
 
         { name: "게시판", href: "/board/main", icon: CardSim },
-        { name: "일정 추가", href: "/plan/register", icon: Plus },
-        { name: "API", href: "#", icon: Plus }
+        { name: "수동 일정 추가", href: "/plan/register", icon: Plus },
+        { name: "자동 일정 추가", href: "#", icon: Plus }
 
     ].filter(Boolean);
 
@@ -52,7 +52,7 @@ const Sidebar = ({onSaveSuccess}) => {
         }
 
         if (user.role === "free") {
-            const goPay = window.confirm("이 기능은 결제가 필요합니다. 결제 페이지로 이동할까요?");
+            const goPay = window.confirm("이 기능은 결제가 필요합니다. 결제 페이지로 이동할까요?\n결제금액: 1000원");
             if (goPay) {
                 // 결제 준비 요청 보내고 리디렉션
                 try {
@@ -111,7 +111,7 @@ const Sidebar = ({onSaveSuccess}) => {
                                 <item.icon className='navIcon' />
                                 {item.name}
                             </button>
-                        ) : item.name === "API" ? (
+                        ) : item.name === "자동 일정 추가" || "게시판" ? (
                             <li key={item.name} className='navItem'>
                                 <button className='navButton' onClick={handleApiAccess}>
                                     <item.icon className='navIcon' />

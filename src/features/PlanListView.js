@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { Context } from '..';
 import axios from 'axios';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Check, Pencil, Trash2 } from 'lucide-react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import ko from "date-fns/locale/ko";
@@ -86,19 +86,25 @@ const PlanListView = () => {
             setPlanDayList((prev) =>
                 prev.map((day) => {
                     if (day.planDayNo === planDayNo) {
-                        const isAllFinished = day.tasks.every(task => task.status === "FINISHED")
+                        const isAllFinished = day.tasks.every(task => task.status === "FINISHED");
                         const newStatus = isAllFinished ? "BEFORE" : "FINISHED";
 
-                        const updatedTasks = day.tasks.map(task => ({
-                            ...task,
-                            status: newStatus
-                        }))
-                        console.log("업데이트된 tasks:", updatedTasks);
-                        return { ...day, tasks: updatedTasks }
+                        const updatedTasks = day.tasks.map(task => {
+                            if (newStatus === "FINISHED" && task.status === "FINISHED") {
+                                return task;
+                            }
+                            return {
+                                ...task,
+                                status: newStatus
+                            };
+                        });
+
+                        return { ...day, tasks: updatedTasks };
                     }
                     return day;
                 })
-            )
+            );
+
 
         } catch (err) {
             console.error("상태 변경 실패", err);
@@ -428,25 +434,38 @@ const PlanListView = () => {
                     ) : (
 
                         <h3 className='plan-detail-title'>
-
-
                             <span
                                 style={{
-                                    textDecoration: isPlanFinished ? "line-through" : "none"
+                                    
+                                    color: isPlanFinished ? "#e0e0e0" : "white",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: "8px"
                                 }}
-                            >{planNameText}
+                            >
+                                {planNameText}
                             </span>
-                            <button className='plan-title-edit-btn' onClick={() => setEditingPlanName(true)}>
-                                ✏️
-                            </button>
-                            <button className='plan-title-delete-btn' onClick={() => removePlan(planNo)}>
-                                <Trash2 size={'1.18rem'} />
-                            </button>
-                            {isPlanFinished && (
-                                <span style={{ marginLeft: '8px', color: 'red', fontWeight: 'bold', fontSize: '1rem', textAlign: 'center' }}>완료된 플랜</span>
-                            )}
+                                {isPlanFinished && (
+                                    <>
+                                        <span className="badge-finished">완료됨</span>
+                                    </>
+                                )}
+                            
 
+                            {!isPlanFinished && (
+                                <>
+                                    <button className='plan-title-edit-btn' onClick={() => setEditingPlanName(true)}>
+                                        ✏️
+                                    </button>
+
+                                </>
+
+                            )}
+                            <button className='plan-title-delete-btn' onClick={() => removePlan(planNo)}>
+                                <Trash2 size={'1.18rem'} style={{color:"black"}} />
+                            </button>
                         </h3>
+
 
                     )}
                     <div className='plan-action'>
@@ -504,22 +523,22 @@ const PlanListView = () => {
                                         <div className='date-content'>
                                             <span >{dayData.date}
                                                 {dayIndex === 0 && (
-                                            <DatePicker
-                                                selected={new Date(dayData.date)}
-                                                onChange={(date) => reArray(planNo, date)}
-                                                dateFormat="yyyy-MM-dd"
-                                                
-                                                locale="ko"
-                                                customInput={
-                                                    <button className='date-action-btn' title='날짜 변경' style={{marginLeft:'5px', padding:'5px'}}>📅</button>
-                                                }
-                                            />
-                                        )}
+                                                    <DatePicker
+                                                        selected={new Date(dayData.date)}
+                                                        onChange={(date) => reArray(planNo, date)}
+                                                        dateFormat="yyyy-MM-dd"
+
+                                                        locale="ko"
+                                                        customInput={
+                                                            <button className='date-action-btn' title='날짜 변경' style={{ marginLeft: '5px', padding: '5px' }}>📅</button>
+                                                        }
+                                                    />
+                                                )}
                                             </span>
-                                            
+
                                             <span >{dayData.planDayContent}</span>
                                         </div>
-                                        
+
                                     </div>
                                     <div className='date-actions'>
                                         <button
@@ -603,7 +622,7 @@ const PlanListView = () => {
                                                             title='삭제'
                                                         >
 
-                                                            <Trash2 size={'1rem'} />
+                                                            <Trash2 size={'1rem'} style={{color:"black"}} />
                                                         </button>
                                                     </>
                                                 )}

@@ -23,8 +23,8 @@ a {
     gap: 8px;
 }
 .logoIcon {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     background-color: green;
     border-radius: 8px;
     display: flex;
@@ -33,7 +33,7 @@ a {
     color: white;
 }
 .logoText {
-    font-size: 20px;
+    font-size: 30px;
     font-weight: bold;    
 }
 .nav {

@@ -94,6 +94,7 @@
 
 .home-title {
     text-align: center;
+    margin-top: 25px;
 }
 
 .main-container {
@@ -430,4 +431,17 @@
     border-radius: 6px;
     font-weight: 500;
     color: #333;
+}
+
+.finished {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #28a745;
+    font-weight: 600;
+    font-size: 14px;
+}
+.finished svg{
+    width: 16px;
+    height: 16px;
 }
