@@ -111,7 +111,7 @@ const Sidebar = ({onSaveSuccess}) => {
                                 <item.icon className='navIcon' />
                                 {item.name}
                             </button>
-                        ) : item.name === "자동 일정 추가" || "게시판" ? (
+                        ) : item.name === "자동 일정 추가" || item.name === "게시판" ? (
                             <li key={item.name} className='navItem'>
                                 <button className='navButton' onClick={handleApiAccess}>
                                     <item.icon className='navIcon' />
