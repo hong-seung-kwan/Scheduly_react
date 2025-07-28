@@ -181,7 +181,7 @@
 
 .plan-date-task-checkbox {
   position: relative;
-  margin-right: 1rem;
+  /* margin-right: 1rem; */
   cursor: pointer;
 }
 

@@ -11,8 +11,17 @@ export const eventSlice = createSlice({
         },
         clearEvents: () => {
             return []
+        },
+        addEvent: (state, action) => {
+            state.push(action.payload)
+        },
+        updatedEvent: (state,action) => {
+            const index = state.findIndex(e => e.id === action.payload.id);
+            if (index !== -1) {
+                state[index] = action.payload
+            }
         }
     },
 });
 
-export const {setEvents, clearEvents} = eventSlice.actions;
+export const {setEvents, clearEvents, addEvent, updatedEvent} = eventSlice.actions;

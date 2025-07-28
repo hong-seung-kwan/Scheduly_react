@@ -12,8 +12,8 @@
 
 .modal-container {
   background-color: #ffffff;
-  width: 600px;
-  height: 450px;
+  width: 80rem;
+  height: 40rem;
   border: 1px solid #cccccc;
   border-radius: 20px;
   padding: 20px;
@@ -39,7 +39,7 @@
 }
 
 .chat-box {
-  height: 200px;
+  height: 25rem;
   overflow-y: auto;
   padding: 12px;
   background: #f7f7f7;
@@ -97,6 +97,14 @@
 .send-btn {
   background-color: #76c3c5;
   color: white;
+  width: 15rem;
+  height: 3rem;
+}
+.save-btn {
+  background-color: #76c3c5;
+  color: white;
+  /* width: 15rem; */
+  height: 3rem;
 }
 
 .send-btn:hover {
@@ -124,4 +132,10 @@
   background-color: #e6e6e6;
   align-self: flex-start;
   text-align: left;
+}
+.button-wrapper {
+  display: flex;
+  width: 100%;
+  justify-content: space-evenly;
+  padding-top: 12px;
 }

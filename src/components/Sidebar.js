@@ -9,9 +9,10 @@ import { Modal } from "../features/ApiModal";
 
 
 
-const Sidebar = () => {
+const Sidebar = ({onSaveSuccess}) => {
 
     const [openModal, setOpenModal] = useState(false);
+    const [reload, setReload] = useState(false);
 
     const user = useSelector((state) => state.member.info);
     const token = useSelector((state) => state.member.token);
@@ -31,15 +32,15 @@ const Sidebar = () => {
     }
 
     const navigation = [
-        { name: "홈 화면", href: "/", icon: Home},
-        !isLogIn &&{ name: "회원가입", href: "/register", icon: UserPen},
+        { name: "홈 화면", href: "/", icon: Home },
+        !isLogIn && { name: "회원가입", href: "/register", icon: UserPen },
         isLogIn
-            ? { name: "로그아웃", href: "/", icon: LogOut}
-            : { name: "로그인", href: "/login", icon: LogIn},
-                
-        { name: "게시판", href: "/board/main", icon: CardSim},
-        { name: "일정 추가", href: "/plan/register", icon: Plus},
-        { name: "API", href: "#", icon: Plus}
+            ? { name: "로그아웃", href: "/", icon: LogOut }
+            : { name: "로그인", href: "/login", icon: LogIn },
+
+        { name: "게시판", href: "/board/main", icon: CardSim },
+        { name: "일정 추가", href: "/plan/register", icon: Plus },
+        { name: "API", href: "#", icon: Plus }
 
     ].filter(Boolean);
 
@@ -69,7 +70,7 @@ const Sidebar = () => {
                     console.log("kakao ready response", data);
                     console.log("token:", token);
 
-                    if(!data.next_redirect_pc_url) {
+                    if (!data.next_redirect_pc_url) {
                         alert("결제 페이지 URL을 받아오지 못했습니다");
                         return;
                     }
@@ -85,7 +86,7 @@ const Sidebar = () => {
             }
         } else {
             setOpenModal(true); // 유료 사용자만 모달 열기
-            
+
         }
     };
 
@@ -128,7 +129,7 @@ const Sidebar = () => {
                     )}
                 </ul>
             </nav>
-            {openModal && <Modal openModal={openModal} setOpenModal={setOpenModal} />}
+            {openModal && <Modal openModal={openModal} setOpenModal={setOpenModal} onSaveSuccess={onSaveSuccess}/>}
         </div>
 
 

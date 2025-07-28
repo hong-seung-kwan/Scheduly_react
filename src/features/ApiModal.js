@@ -3,23 +3,21 @@ import "../css/ApiModal.css";
 import { useDispatch, useSelector } from "react-redux";
 import { Context } from "..";
 import axios from "axios";
-import { addPlan } from "../store/planSlice";
 
-export const Modal = ({ openModal, setOpenModal , sharedPlan }) => {
-
+export const Modal = ({ openModal, setOpenModal, sharedPlan, onSaveSuccess }) => {
   const [message, setMessage] = useState("");
   const user = useSelector((state) => state.member.info);
   const token = useSelector((state) => state.member.token);
   const [reload, setReload] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [currentPlan, setCurrentPlan] = useState([]);
-  const dispatch = useDispatch();
+
 
   const { host } = useContext(Context)
 
   const handleSend = async () => {
-    
-    
+
+
     setChatMessages(prev => [...prev, { sender: "user", text: message }]);
     if (chatMessages.length === 0) {
       try {
@@ -32,18 +30,18 @@ export const Modal = ({ openModal, setOpenModal , sharedPlan }) => {
         const plan = response.data;
 
         setCurrentPlan(JSON.stringify(plan));
-        
+
         const replyText = [
           plan.study,
           "",
           ...plan.list.map(item => {
             const detailsText = item.details
-            .map(detail => ` -${detail.detail}`)
-            .join("\n");
+              .map(detail => ` -${detail.detail}`)
+              .join("\n");
 
             return `${item.date}: ${item.content}\n${detailsText}`;
-          }) 
-          
+          })
+
         ].join("\n");
         setChatMessages(prev => [...prev, { sender: "system", text: replyText }]);
         setMessage("");
@@ -60,7 +58,7 @@ export const Modal = ({ openModal, setOpenModal , sharedPlan }) => {
         }
 
         const response = await axios.post(`${host}/gpt/fixPlan`, JSON.stringify(body), {
-          
+
           headers: {
             Authorization: token,
             "Content-Type": "application/json"
@@ -73,12 +71,12 @@ export const Modal = ({ openModal, setOpenModal , sharedPlan }) => {
           "",
           ...plan.list.map(item => {
             const detailsText = item.details
-            .map(detail => ` -${detail.detail}`)
-            .join("\n");
+              .map(detail => ` -${detail.detail}`)
+              .join("\n");
 
             return `${item.date}: ${item.content}\n${detailsText}`;
-          }) 
-          
+          })
+
         ].join("\n");
         setChatMessages(prev => [...prev, { sender: "system", text: replyText }]);
         setMessage("");
@@ -94,49 +92,56 @@ export const Modal = ({ openModal, setOpenModal , sharedPlan }) => {
 
 
   const handleSave = async () => {
-  try {
-    const response = await axios.post(`${host}/gpt/savePlan`, currentPlan, {
-      headers: {
-        Authorization: token,
-        "Content-Type": "application/json"
+    console.log("handleSave 실행됨");
+    try {
+      const response = await axios.post(`${host}/gpt/savePlan`, currentPlan, {
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json"
+        }
+      });
+
+      const planNo = response.data;
+      
+      alert("플랜이 저장되었습니다!");
+      // setReload(prev => !prev);
+
+      if (onSaveSuccess) {
+        onSaveSuccess();
+        
       }
-    });
 
-    const planNo = response.data;
-    alert("플랜이 저장되었습니다!");
-    dispatch(addPlan({...currentPlan, planNo}));
-    
 
-  } catch (error) {
-    console.error("플랜 저장 실패:", error);
-    alert("플랜 저장 실패");
-  }
-};
+    } catch (error) {
+      console.error("플랜 저장 실패:", error);
+      alert("플랜 저장 실패");
+    }
+  };
 
-useEffect(() => {
-  if(sharedPlan && sharedPlan.study && sharedPlan.list) {
-    const replyText = [
-      sharedPlan.study,
-      "",
-      ...sharedPlan.list.map(item => {
-        const detailsText = item.details
-          .map(detail => ` -${detail.detail}`)
-          .join("\n");
-        return `${item.date}: ${item.content}\n${detailsText}`;
-      })
-    ].join("\n")
+  useEffect(() => {
+    if (sharedPlan && sharedPlan.study && sharedPlan.list) {
+      const replyText = [
+        sharedPlan.study,
+        "",
+        ...sharedPlan.list.map(item => {
+          const detailsText = item.details
+            .map(detail => ` -${detail.detail}`)
+            .join("\n");
+          return `${item.date}: ${item.content}\n${detailsText}`;
+        })
+      ].join("\n")
 
-    setChatMessages([{ sender: "system", text:replyText}]);
-    setCurrentPlan(sharedPlan);
-  }
-},[sharedPlan]);
+      setChatMessages([{ sender: "system", text: replyText }]);
+      setCurrentPlan(sharedPlan);
+    }
+  }, [sharedPlan]);
 
 
 
   return (
     <div className="overlay">
       <div className="modal-container">
-        <button className='close-btn' onClick={() => {setOpenModal(false)}}>✖</button>
+        <button className='close-btn' onClick={() => { setOpenModal(false) }}>✖</button>
         <h2>API</h2>
         <div className="chat-box">
           {chatMessages.map((msg, index) => (
@@ -153,8 +158,10 @@ useEffect(() => {
             onChange={(e) => setMessage(e.target.value)}
             placeholder="예: 정보처리기사 2주간 공부 계획 짜줘"
           ></input>
-          <button className="send-button" onClick={handleSend}>전송</button>
-          <button className="send-button" onClick={handleSave}>저장</button>
+          <div className="button-wrapper">
+          <button className="send-btn" onClick={handleSend}>전송</button>
+          <button className="send-btn" onClick={handleSave}>저장</button>
+          </div>
         </div>
 
       </div>

@@ -308,8 +308,8 @@
   padding-left: 0;
 }
 
-.comment-item.child {
-  margin-left: 2rem;
+.comment-item.child.level-1 {
+  margin-left: 1.5rem;
   padding-left: 1rem;
   border-left: 2px solid #e5e7eb;
   border-bottom: 1px solid #f9fafb;
@@ -318,15 +318,19 @@
 }
 
 .comment-item.child.level-2 {
-  margin-left: 4rem;
+  margin-left: 1.5rem;
+  padding-left: 1rem;
   background: #f8f9fa;
-  border-left-color: #d1d5db;
+  border-left: 2px solid #d1d5db;
+  border-radius: 0.5rem;
 }
 
 .comment-item.child.level-3 {
-  margin-left: 6rem;
+  margin-left: 1.5rem;
+  padding-left: 1rem;
+  border-radius: 0.5rem;
   background: #f6f7f8;
-  border-left-color: #9ca3af;
+  border-left: 2px solid #9ca3af;
 }
 
 .comment-header {
@@ -468,7 +472,7 @@
 }
 
 
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   .board-view-container {
     padding: 1rem;
   }
@@ -483,18 +487,6 @@
   .comments-list {
     padding-left: 1rem;
     padding-right: 1rem;
-  }
-
-  .comment-item.child {
-    margin-left: 1rem;
-  }
-
-  .comment-item.child.level-2 {
-    margin-left: 2rem;
-  }
-
-  .comment-item.child.level-3 {
-    margin-left: 3rem;
   }
 
   .recommendation-section {
@@ -515,9 +507,9 @@
     width: 100%;
     justify-content: center;
   }
-}
+} */
 
-@media (max-width: 640px) {
+/* @media (max-width: 640px) {
   .post-title {
     font-size: 1.25rem;
   }
@@ -533,7 +525,7 @@
     align-items: flex-start;
     gap: 0.5rem;
   }
-}
+} */
 
 .card {
   min-width: 320px;

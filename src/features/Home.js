@@ -7,15 +7,16 @@ import axios from "axios";
 import { Context } from '../index';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearEvents, setEvents } from '../store/eventSlice';
-import { ArrowDown, ArrowUp } from 'lucide-react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { ArrowDown, ArrowUp, Pencil, Trash2, X } from 'lucide-react';
 import { Modal } from './ApiModal';
+import { useNavigate } from 'react-router-dom';
+import Sidebar from '../components/Sidebar';
 
 const Home = () => {
 
   const user = useSelector((state) => state.member.info);
   const token = useSelector((state) => state.member.token);
-  // const [events, setEvents] = useState([]);
+  const [calendarEvents, setCalendarEvents] = useState([]);
   const events = useSelector((state) => state.events);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -31,16 +32,16 @@ const Home = () => {
   const [selectDate, setSelectDate] = useState("");
   const [selectPlanDayNo, setSelectPlanDayNo] = useState(null);
   const [myPlan, setMyPlan] = useState([]);
-  const plans = useSelector((state) => state.plan.plans);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [openModal, setOpenModal] = useState(false);
 
 
-  const today = new Date().toLocaleDateString("ko-KR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    weekday: "long"
 
-  })
+
+  const handleSaveSuccess = async () => {
+    setReload(prev => !prev);
+  };
+
   const handleEventClick = (info) => {
     const rawDetails = info.event.extendedProps.rawDetails;
     const planDayNo = info.event.id;
@@ -120,12 +121,33 @@ const Home = () => {
 
         tasks.map((task) =>
           task.id === id ? { ...task, status: updateStatus } : task
+
         )
       );
+
+      dispatch(setEvents(events.map(event => {
+        if (event.id === planDayNo) {
+          const updatedDetails = event.rawDetails.map((d, idx) => {
+            if (idx === detailIndex) {
+              return {
+                ...d,
+                detailStatus: updateStatus ? "FINISHED" : "BEFORE"
+              };
+            }
+            return d;
+          });
+          return { ...event, rawDetails: updatedDetails };
+        }
+        return event;
+      })))
+
+      setReload(prev => !prev);
+
     } catch (error) {
       console.log("실패", error);
     }
   };
+
 
   // 삭제
   const deleteTask = async (taskId, planDayNo, detailIndex) => {
@@ -276,6 +298,88 @@ const Home = () => {
     }
   }
 
+  const removePlan = async (planNo) => {
+    const confirm = window.confirm("플랜을 삭제하시겠습니까??");
+    if (!confirm) return;
+
+    console.log("삭제 요청 planNo:", planNo);
+
+    try {
+      const response = await axios.post(`${host}/plan/removePlan`, null, {
+        params: {
+          planNo,
+        },
+        headers: {
+          Authorization: token
+        }
+      })
+      if (response.status === 200 || response.status === 202) {
+        alert("플랜이 삭제되었습니다.")
+        navigate("/");
+        setMyPlan((prevPlans) => prevPlans.filter(plan => plan.id !== planNo));
+      }
+    } catch (err) {
+      console.error("플랜 삭제 실패", err);
+    }
+  }
+
+  // 편집 시작
+  const startEditingPlan = (planId) => {
+    setMyPlan(prev =>
+      prev.map(plan =>
+        plan.id === planId
+          ? { ...plan, editing: true, editName: plan.name }
+          : plan
+      )
+    );
+  };
+
+  // 입력 변경
+  const changePlanName = (planId, newName) => {
+    setMyPlan(prev =>
+      prev.map(plan =>
+        plan.id === planId
+          ? { ...plan, editName: newName }
+          : plan
+      )
+    );
+  };
+  // 저장
+  const savePlanName = async (planId) => {
+    const plan = myPlan.find(p => p.id === planId);
+    if (!plan) return;
+    try {
+      const response = await axios.post(`${host}/plan/modify`, {
+        planNo: planId,
+        planName: plan.editName,
+      }, {
+        headers: { Authorization: token }
+      });
+      if (response.status === 200) {
+        setMyPlan(prev =>
+          prev.map(p =>
+            p.id === planId
+              ? { ...p, name: plan.editName, editing: false, editName: "" }
+              : p
+          )
+        );
+        alert("플랜 이름이 수정되었습니다.");
+      }
+    } catch (error) {
+      console.error("이름 수정 실패", error);
+      alert("이름 수정에 실패했습니다.");
+    }
+  };
+  const cancelEditingPlan = (planId) => {
+    setMyPlan(prev =>
+      prev.map(plan =>
+        plan.id === planId
+          ? { ...plan, editing: false, editName: "" }
+          : plan
+      )
+    );
+  };
+
   const userNo = user?.userNo;
 
   useEffect(() => {
@@ -283,12 +387,18 @@ const Home = () => {
     if (!userNo) {
       dispatch(clearEvents());
       setTodayTasks([]);
-      // setMyPlan(false);
-      // setSelectTitle("");
-      // setSelectedTasks([]);
-      // setSelectPlanDayNo(null);
       return;
     }
+
+    // 처음 로딩 시에만 초기화 실행
+    if (isInitialLoad) {
+      setMyPlan(false);
+      setSelectTitle("");
+      setSelectedTasks([]);
+      setSelectPlanDayNo(null);
+      setIsInitialLoad(false);
+    }
+
     if (selectedTasks.length === 0 && todayTasks.length > 0 && !selectTitle) {
       setSelectedTasks(todayTasks);
     }
@@ -300,7 +410,7 @@ const Home = () => {
             Authorization: token
           }
         });
-        const colors = ['#76c3c577', '#c3767655', '#7676c377', '#E6CCFF', '	#FFE5B4', '#B3DDF2', '	#F5FFFA'];
+        const colors = ['#76c3c577', '#c3767655', '#7676c377', '#E6CCFF', '#FFE5B4', '#B3DDF2', '#F5FFFA'];
 
         const colorMap = {};
 
@@ -312,6 +422,7 @@ const Home = () => {
           }
           return colorMap[key];
         }
+
         if (response.status === 200) {
           const eventsData = response.data.map(planDay => ({
             id: planDay.planDayNo,
@@ -322,29 +433,23 @@ const Home = () => {
             rawDetails: planDay.details,
             backgroundColor: getColorForPlanNo(planDay.planNo)
           }));
-
           dispatch(setEvents(eventsData));
 
           const todayStr = new Date().toISOString().split('T')[0];
-
-
           const todayPlanDays = response.data.filter(pd => pd.planDayDate === todayStr);
 
-
           const newTodayTasks = [];
-
           todayPlanDays.forEach(planDay => {
             planDay.details.forEach((detail, index) => {
               newTodayTasks.push({
-                planDayNo: planDay.planDayNo,                   // 어떤 planDay에 속한 detail인지
-                id: `${planDay.planDayNo}-${index}`,            // 고유 ID
+                planDayNo: planDay.planDayNo,
+                id: `${planDay.planDayNo}-${index}`,
                 task: detail.detail,
-                status: detail.detailStatus === "FINISHED" ? true : false,
+                status: detail.detailStatus === "FINISHED",
                 detailIndex: index
               });
             });
           });
-
           setTodayTasks(newTodayTasks);
         } else {
           throw new Error(`API error: ${response.status} ${response.statusText}`);
@@ -354,30 +459,17 @@ const Home = () => {
         setTodayTasks([]);
       }
     };
-
-    setMyPlan(false);
-    setSelectTitle("");
-    setSelectedTasks([]);
-    setSelectPlanDayNo(null);
-
-
-    const events = plans.flatMap(plan =>
-      plan.list.map(item => ({
-        title: item.comtent,
-        start: item.date,
-      }))
-
-    );
-    dispatch(setEvents(events));
-
+    setCalendarEvents(events);
     apicall();
-  }, [userNo, host, dispatch, token, reload, plans]);
+
+  }, [userNo, host, dispatch, token, reload]);
 
 
 
   return (
     <>
       <div className="home-title">
+        
         <h2 style={{ marginTop: "10px" }}>나의 플래너</h2>
         {user !== null && `${user.userName}`}
       </div>
@@ -532,8 +624,8 @@ const Home = () => {
                         </>
                       ) : (
                         <>
-                          <button className='edit-btn' onClick={(e) => { e.stopPropagation(); startEditing(task.id, task.task) }}>✏️</button>
-                          <button className='delete-btn' onClick={(e) => { e.stopPropagation(); deleteTask(task.id, task.planDayNo, task.detailIndex) }}>×</button>
+                          <button className='edit-btn' onClick={(e) => { e.stopPropagation(); startEditing(task.id, task.task) }}><Pencil /></button>
+                          <button className='delete-btn' onClick={(e) => { e.stopPropagation(); deleteTask(task.id, task.planDayNo, task.detailIndex) }}><X /></button>
                         </>
                       )}
                     </div>
@@ -562,36 +654,111 @@ const Home = () => {
                 myPlan.map((plan) => (
                   <div key={plan.id} className="task-item">
                     <div className="task-content">
-                      <span
-                        className='task-text'
-                        onClick={() => {
-                          console.log(plan);
-                          navigate(`/plan/listview/${plan.id}`, {
-                            state: { planName: plan.name }
-
-                          })
-                        }}
-                        style={{ cursor: "pointer", textDecoration: "underline" }}
-                      >{plan.name}</span>
+                      {plan.editing ? (
+                        <input
+                          className='edit-input'
+                          type="text"
+                          value={plan.editName}
+                          onChange={(e) => {
+                            // editName 상태 변경
+                            setMyPlan(prev =>
+                              prev.map(p =>
+                                p.id === plan.id ? { ...p, editName: e.target.value } : p
+                              )
+                            );
+                          }}
+                        />
+                      ) : (
+                        <span
+                          className='task-text'
+                          onClick={() => {
+                            console.log(plan);
+                            navigate(`/plan/listview/${plan.id}`, {
+                              state: { planName: plan.name }
+                            });
+                          }}
+                          style={{ cursor: "pointer", textDecoration: "underline" }}
+                        >
+                          {plan.name}
+                        </span>
+                      )}
                     </div>
 
                     <div>
-                      <button
-                        className='edit-btn'
-                      // onClick={""}
-                      >✏️</button>
+                      {plan.editing ? (
+                        <>
+                          <button
+                            className='save-btn'
+                            onClick={async () => {
+                              try {
+                                const response = await axios.post(`${host}/plan/modify`, {
+                                  planNo: plan.id,
+                                  planName: plan.editName,
+                                }, {
+                                  headers: { Authorization: token }
+                                });
+                                if (response.status === 200) {
+                                  setMyPlan(prev =>
+                                    prev.map(p =>
+                                      p.id === plan.id
+                                        ? { ...p, name: plan.editName, editing: false, editName: "" }
+                                        : p
+                                    )
+                                  );
+                                  alert("플랜 이름이 수정되었습니다.");
+                                }
+                              } catch (error) {
+                                console.error("이름 수정 실패", error);
+                                alert("이름 수정에 실패했습니다.");
+                              }
+                            }}
+                          >
+                            저장
+                          </button>
+                          <button
+                            className='cancle-btn'
+                            onClick={() => {
+                              setMyPlan(prev =>
+                                prev.map(p =>
+                                  p.id === plan.id
+                                    ? { ...p, editing: false, editName: "" }
+                                    : p
+                                )
+                              );
+                            }}
+                          >
+                            취소
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            className='edit-btn'
+                            onClick={() => {
+                              setMyPlan(prev =>
+                                prev.map(p =>
+                                  p.id === plan.id
+                                    ? { ...p, editing: true, editName: plan.name }
+                                    : p
+                                )
+                              );
+                            }}
+                          >
+                            <Pencil />
+                          </button>
 
-                      <button
-                        className='delete-btn'
-                      // onClick={""}
-                      >×</button>
+                          <button
+                            className='delete-btn'
+                            onClick={() => removePlan(plan.id)}
+                          >
+                            <X />
+                          </button>
 
-                      <button
-                        className='save-btn'
-                      // onClick={""}
-                      >
-                        {plan.Planstatus === "FINISHED" ? "✅ 완료" : "⏪ 진행"}
-                      </button>
+                          <button className='save-btn'>
+                            {plan.Planstatus === "FINISHED" ? "완료" : "진행"}
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))
@@ -601,13 +768,11 @@ const Home = () => {
                 </div>
               )}
             </div>
+
+
+
           </div>
         )}
-
-        
-
-
-
 
       </div>
     </>
