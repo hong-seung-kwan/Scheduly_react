@@ -53,6 +53,24 @@ const BoardRegister = () => {
     }
   }
 
+  const handleDelete = async () => {
+    console.log(selectedApiPlan)
+    try {
+      await axios.post(`${host}/Api/delete`, selectedApiPlan,
+        {
+          headers: {
+            Authorization: token,
+            "content-type": "application/json",
+          },
+        })
+      setapiPlanName('');
+      setSelectedApiPlan(null);
+      fetchAPIPlan();
+    } catch (err) {
+      console.log('실패', err)
+    }
+  }
+
   const [selectedApiPlan, setSelectedApiPlan] = useState(null);
   const [expandedPlan, setExpandedPlan] = useState(new Set());
   const [expandedDetails, setExpandexDetails] = useState({});
@@ -103,36 +121,41 @@ const BoardRegister = () => {
         </div>
         {/* select */}
         <div className='select-section'>
-          <h2 className='select-title'>업로드 플랜 선택</h2>
+          <div className='section-div'>
+            <h2 className='select-title'>업로드 플랜 선택</h2>
+            <button className='select-delete' disabled={selectedApiPlan == null} onClick={() => {
+              if (window.confirm("선택한 플랜을 삭제하시겠습니까?")) { handleDelete(); }
+            }}>선택한 플랜 삭제</button>
+          </div>
           <div className='cards-container'>
             <div className='cards-scroll'>
               {apiPlan.map((plan) => (
-                <div key={plan.apiPlanNo} onClick={() => {handleGroupChange(plan.apiPlanNo); setapiPlanName(plan.apiPlanContentList.study);}} className={`card ${selectedApiPlan === plan.apiPlanNo ? "selected" : ""}`}>
+                <div key={plan.apiPlanNo} onClick={() => { handleGroupChange(plan.apiPlanNo); setapiPlanName(plan.apiPlanContentList.study); }} className={`card ${selectedApiPlan === plan.apiPlanNo ? "selected" : ""}`}>
                   <div className='card-header'>
                     <h3 className='card-title'>{plan.apiPlanContentList.study}</h3>
-                    <button className='card-expand-btn' onClick={(e) => {handlePlanExpand(plan.apiPlanNo, e); 
+                    <button className='card-expand-btn' onClick={(e) => {
+                      handlePlanExpand(plan.apiPlanNo, e);
                     }}>
                       <ChevronDown className={`card-expand-icon ${isPlanExtanded(plan.apiPlanNo) ? "expanded" : ""}`} />
                     </button>
                   </div>
-                  {isPlanExtanded(plan.apiPlanNo)&&(
+                  {isPlanExtanded(plan.apiPlanNo) && (
                     <div className='details'>
                       <div className='details-list'>
-                        {plan.apiPlanContentList.list.map((item, index)=>(
+                        {plan.apiPlanContentList.list.map((item, index) => (
                           <div className='detail-item' key={index}>
-                            <div className='detail-header' onClick={(e)=>toggleDetailExpantion(plan.apiPlanNo, index, e)}>
+                            <div className='detail-header' onClick={(e) => toggleDetailExpantion(plan.apiPlanNo, index, e)}>
                               <div className='detail-header-content'>
                                 <span className='detail-date'>{item.date}</span>
                                 <span>{item.content}</span>
                               </div>
-                              <ChevronDown className={`detail-toggle ${
-                                isDetailExpanded(plan.apiPlanNo, index) ? "expanded" : ""}`}/>
+                              <ChevronDown className={`detail-toggle ${isDetailExpanded(plan.apiPlanNo, index) ? "expanded" : ""}`} />
                             </div>
                             {isDetailExpanded(plan.apiPlanNo, index) && (
                               <div className='detail-content'>
                                 <div className='detail-description'>세부 내용:</div>
                                 <ul className='detail-list'>
-                                  {item.details.map((detail, i)=>(
+                                  {item.details.map((detail, i) => (
                                     <li key={i}>{detail.detail}</li>
                                   ))}
                                 </ul>
@@ -152,29 +175,29 @@ const BoardRegister = () => {
         {/* input창 */}
         <div className="form-section">
           <h2 className="form-title">
-            <FileText className="btn-icon" style={{display: "inline", marginRight: "0.5rem"}} />
+            <FileText className="btn-icon" style={{ display: "inline", marginRight: "0.5rem" }} />
             게시글 정보
           </h2>
           <div className="form-group">
             <label className="form-label">선택된 플랜</label>
-            <input type="text" className="form-input" value={apiPlanName} placeholder="플랜을 선택하세요" readOnly/>
+            <input type="text" className="form-input" value={apiPlanName} placeholder="플랜을 선택하세요" readOnly />
           </div>
 
           <div className="form-group">
             <label className="form-label">게시글 제목</label>
-            <input type="text" className="form-input" value={board.boardName} onChange={(e)=>setBoard({...board, boardName: e.target.value})} placeholder="제목을 입력하세요"/>
+            <input type="text" className="form-input" value={board.boardName} onChange={(e) => setBoard({ ...board, boardName: e.target.value })} placeholder="제목을 입력하세요" />
           </div>
 
           <div className="form-group">
             <label className="form-label">게시글 내용</label>
-            <textarea className="form-input form-textarea" value={board.boardContent} onChange={(e)=>setBoard({...board, boardContent: e.target.value})} placeholder="내용을 입력하세요" />
+            <textarea className="form-input form-textarea" value={board.boardContent} onChange={(e) => setBoard({ ...board, boardContent: e.target.value })} placeholder="내용을 입력하세요" />
           </div>
 
           <div className="submitDiv">
-              <button onClick={handleSave} className="btn-submit" disabled={!board.apiPlan || !board.boardName || !board.boardContent}>
-                <Send className="btn-icon" />
-                등록
-              </button>
+            <button onClick={handleSave} className="btn-submit" disabled={!board.apiPlan || !board.boardName || !board.boardContent}>
+              <Send className="btn-icon" />
+              등록
+            </button>
           </div>
         </div>
       </div>

@@ -26,21 +26,34 @@ const Login = () => {
     }
 
     const handleSubmit = async (e) => {
-
         e.preventDefault();
 
-        const response = await axios.post(
-            `${host}/login`,
-            user
-        );
+        try {
+            const response = await axios.post(`${host}/login`, user);
+            if (response.status === 200) {
+                dispatch(login(response.data));
+                navigate('/');
+            }
+        } catch (error) {
+            // 서버에서 보낸 에러 메시지 가져오기
+            if (error.response && error.response.data && error.response.data.message) {
+                const message = error.response.data.message;
 
-        if (response.status === 200) {
-            dispatch(login(response.data));
-            navigate('/');
-        } else {
-            throw new Error(`api error: ${response.status} ${response.statusText}`);
+                console.log(error.response.data.message)
+
+                if (message.includes("id")) {
+                    alert("아이디가 틀렸습니다.");
+                } else if (message.includes("자격증명") || message.includes("Bad credentials")) {
+                    alert("비밀번호가 틀렸습니다.");
+                } else {
+                    alert("로그인 실패: " + message);
+                }
+            } else {
+                alert("서버와 연결할 수 없습니다.");
+            }
         }
-    }
+    };
+
 
     const handleGoogleLogin = async (credentialResponse) => {
         const idToken = credentialResponse.credential;
@@ -53,7 +66,7 @@ const Login = () => {
             });
 
             if (response.status === 200) {
-                const { token, userNo, userId, userName, role} = response.data;
+                const { token, userNo, userId, userName, role } = response.data;
 
                 axios.defaults.headers.common['Authorization'] = `${token}`;
                 dispatch(login({

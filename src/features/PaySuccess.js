@@ -35,14 +35,15 @@ const PaySuccess = () => {
         pg_token,
         tid,
         userNo
-      },{
-        headers:{
+        
+      }, {
+        headers: {
           Authorization: token
         }
       })
       .then((response) => {
         alert("결제가 성공적으로 완료되었습니다!");
-        const {user} = response.data;
+        const { user } = response.data;
         dispatch(updateUserInfo(user));
         localStorage.setItem('user', JSON.stringify(user));
         navigate("/")
