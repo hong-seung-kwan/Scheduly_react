@@ -1,0 +1,2 @@
+/api/* http://scheduly.duckdns.org:8080/:splat 200
+/* /index.html 200

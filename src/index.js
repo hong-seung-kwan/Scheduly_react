@@ -9,7 +9,7 @@ import { login } from './store/memberSlice';
 
 export const Context = createContext();
 
-let host = 'http://localhost:8080';
+let host = 'http://scheduly.duckdns.org:8080';
 
 // 로그인 정보 유지
 const userStr = localStorage.getItem('user');

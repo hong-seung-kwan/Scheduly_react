@@ -57,7 +57,7 @@ const Sidebar = ({ onSaveSuccess }) => {
             if (goPay) {
                 // 결제 준비 요청 보내고 리디렉션
                 try {
-                    const response = await fetch("http://localhost:8080/kakao/ready", {
+                    const response = await fetch("http://scheduly.duckdns.org:8080/kakao/ready", {
                         method: "POST",
                         headers: {
                             Authorization: token,
@@ -103,7 +103,7 @@ const Sidebar = ({ onSaveSuccess }) => {
             if (goPay) {
                 // 결제 준비 요청 보내고 리디렉션
                 try {
-                    const response = await fetch("http://localhost:8080/kakao/ready", {
+                    const response = await fetch("http://scheduly.duckdns.org:8080/kakao/ready", {
                         method: "POST",
                         headers: {
                             Authorization: token,
