@@ -16,7 +16,7 @@ const Home = () => {
 
   const user = useSelector((state) => state.member.info);
   const token = useSelector((state) => state.member.token);
-  const [calendarEvents, setCalendarEvents] = useState([]);
+  // const [calendarEvents, setCalendarEvents] = useState([]);
   const events = useSelector((state) => state.events);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -323,63 +323,6 @@ const Home = () => {
     }
   }
 
-  // 편집 시작
-  const startEditingPlan = (planId) => {
-    setMyPlan(prev =>
-      prev.map(plan =>
-        plan.id === planId
-          ? { ...plan, editing: true, editName: plan.name }
-          : plan
-      )
-    );
-  };
-
-  // 입력 변경
-  const changePlanName = (planId, newName) => {
-    setMyPlan(prev =>
-      prev.map(plan =>
-        plan.id === planId
-          ? { ...plan, editName: newName }
-          : plan
-      )
-    );
-  };
-  // 저장
-  const savePlanName = async (planId) => {
-    const plan = myPlan.find(p => p.id === planId);
-    if (!plan) return;
-    try {
-      const response = await axios.post(`${host}/plan/modify`, {
-        planNo: planId,
-        planName: plan.editName,
-      }, {
-        headers: { Authorization: token }
-      });
-      if (response.status === 200) {
-        setMyPlan(prev =>
-          prev.map(p =>
-            p.id === planId
-              ? { ...p, name: plan.editName, editing: false, editName: "" }
-              : p
-          )
-        );
-        alert("플랜 이름이 수정되었습니다.");
-      }
-    } catch (error) {
-      console.error("이름 수정 실패", error);
-      alert("이름 수정에 실패했습니다.");
-    }
-  };
-  const cancelEditingPlan = (planId) => {
-    setMyPlan(prev =>
-      prev.map(plan =>
-        plan.id === planId
-          ? { ...plan, editing: false, editName: "" }
-          : plan
-      )
-    );
-  };
-
   const userNo = user?.userNo;
 
   useEffect(() => {
@@ -460,7 +403,7 @@ const Home = () => {
         setTodayTasks([]);
       }
     };
-    setCalendarEvents(events);
+    // setCalendarEvents(events);
     apicall();
 
   }, [userNo, host, dispatch, token, reload]);
@@ -471,7 +414,7 @@ const Home = () => {
     <>
       <div className="home-title">
         
-        <h2 style={{ marginTop: "10px" }}>{user !== null ? `${user.userName}의 플래너`: "로그인 후 이용하세요"}</h2>
+        <h2 style={{ marginTop: "10px", marginBottom:"20px" }}>{user !== null ? `${user.userName}의 플래너`: "로그인 후 이용하세요"}</h2>
       </div>
       <button className="my-schedule-btn" onClick={() => {
         setMyPlan(true);
@@ -482,8 +425,8 @@ const Home = () => {
       }}>
         📅 내 일정
       </button>
-      <div className='main-container'>
-        <div id="calendar-container" className={selectedTasks.length === 0 ? "full" : "shrink"}>
+      <div className={`main-container ${selectedTasks.length > 0 ? "with-tasks" : ""}`}>
+        <div id="calendar-container" >
           <FullCalendar
             plugins={[dayGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
